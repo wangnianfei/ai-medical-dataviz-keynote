@@ -1,12 +1,12 @@
 # 38 页演示文稿素材溯源与复现清单（Asset Manifest · v7）
 
-本仓库仅收录本套 38 页 HTML 幻灯片**实际引用的 28 张高清图像**（外加 6 份由 R 生成的伴生矢量 PDF，总计 ~24 MB），零冗余、零未发表手稿或隐私数据。
+本仓库仅收录本套 38 页 HTML 幻灯片**实际引用的 30 张高清图像**（外加 8 份由 R 生成的伴生矢量 PDF，总计 ~25 MB），零冗余、零未发表手稿或隐私数据。
 
 ---
 
 ## 1. 可复现 R 脚本生成图（`assets/generated/`，300 DPI PNG + 矢量 PDF）
 
-运行 `Rscript code/r/run_all.R` 即可从零一键复现以下全部 6 组图表：
+运行 `Rscript code/r/run_all.R` 即可从零一键复现以下全部 8 组图表：
 
 | 文件名 | 对应页码 | 复现源码 | 底层数据 | 说明 |
 | :--- | :---: | :--- | :--- | :--- |
@@ -16,6 +16,8 @@
 | `06_context_scaling_and_rot.png` | P09 | `code/r/06_context_scaling_and_rot.R` | `data/context_scaling_quadratic.csv` & `lost_in_the_middle_curve.csv` | $O(N^2)$ 算力曲线 + Lost in the Middle U 型曲线 |
 | `07_font_arial_vs_times.png` | P28 | `code/r/07_font_arial_vs_times.R` | `data/clinical_pfs_demo_n36.csv` | 单栏 85mm 缩印清晰度实测：Times New Roman vs Arial/Helvetica |
 | `08_three_tier_viz_evolution.png` | P23 | `code/r/08_three_tier_viz_evolution.R` | `data/toothgrowth_clinical_demo.csv` | 同一数据集三阶输入 $x$ 跃迁（0阶默认 → 1阶清晰 → 2阶 CNS 精修） |
+| `15_prime_distribution.png` | P02 | `code/r/09_riemann_zeta_and_primes.R` | 纯数学实时计算（埃氏筛 + 对数积分 $\operatorname{Li}(x)$） | 质数计数阶梯 $\pi(x)$ vs 平滑渐近律 $\operatorname{Li}(x)$ + 质数序列条码 |
+| `16_riemann_zeta_critical_line.png` | P02 | `code/r/09_riemann_zeta_and_primes.R` | 纯数学实时计算（Euler-Maclaurin 复平面 $\zeta(s)$） | 临界带 $|\zeta(\sigma+it)|$ 地形等高线 + 同步对齐 $\operatorname{Re}(s)=\tfrac{1}{2}$ 零点波形 |
 
 ---
 

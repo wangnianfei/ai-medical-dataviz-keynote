@@ -1,7 +1,7 @@
 # ==============================================================================
 # run_all.R
 # One-click reproducibility script: exports tidy datasets to data/ and
-# regenerates all 6 publication-grade teaching figures (300 DPI PNG + vector PDF)
+# regenerates all 8 publication-grade teaching figures (300 DPI PNG + vector PDF)
 # Run from the repository root:
 #   Rscript code/r/run_all.R
 # ==============================================================================
@@ -13,7 +13,8 @@ scripts <- c(
   "code/r/04_table_reading_vs_code.R",
   "code/r/06_context_scaling_and_rot.R",
   "code/r/07_font_arial_vs_times.R",
-  "code/r/08_three_tier_viz_evolution.R"
+  "code/r/08_three_tier_viz_evolution.R",
+  "code/r/09_riemann_zeta_and_primes.R"
 )
 
 for (s in scripts) {
