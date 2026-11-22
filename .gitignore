@@ -6,5 +6,8 @@
 .Rproj.user/
 qa_shots/
 scratch/
+audio_preview/
+__pycache__/
+*.pyc
 *.tmp
 *.log

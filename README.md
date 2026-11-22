@@ -9,7 +9,8 @@
 
 ## 一、核心亮点
 
-- **在线即看 / 断网可演**：克隆仓库后双击打开 [`slides/index.html`](./slides/index.html)，或直接访问 GitHub Pages 链接即可完整演示，零 CDN 依赖。
+- **在线即看 / 断网可演 / 打包即播**：克隆仓库或下载 ZIP **完整解压**后，双击打开 [`index.html`](./index.html) 或 [`slides/index.html`](./slides/index.html) 即可在**完全不联网**的环境下流畅演示全部 38 页、全部高清图片与 8 大交互动画（零 CDN、零外部字体、零本地服务器依赖）。
+- **附带约 30 分钟逐页故事化口播旁白与自动播放预备包**：详见 [`docs/05_narration_script_30min.md`](./docs/05_narration_script_30min.md) 与 [`narration/`](./narration/README.md)（含男声 TTS 批量合成脚本与声音克隆工作流）。
 - **暖白编辑部美学体系**：摒弃模板化“企业蓝”，采用暖白纸底（`#F7F4EE`）、暖黑曜石（`#1B1815`）、森林松绿（`#1B5E55`）、陶土红（`#C2412D`）与琥珀金（`#B07219`）；全套视觉字号严格 `≥ 22px`（`≥ 16pt`）。
 - **8 大现场可交互演示与微动画**：
   1. **P06**：自回归“文字接龙”与上下文分化互动动画
@@ -59,19 +60,25 @@ ai-medical-dataviz-keynote/
 │       ├── 06_context_scaling_and_rot.R
 │       ├── 07_font_arial_vs_times.R
 │       ├── 08_three_tier_viz_evolution.R
+│       ├── 09_riemann_zeta_and_primes.R # 黎曼猜想：质数分布 + ζ(s) 临界线实绘
 │       ├── export_datasets.R            # 一键导出 data/ 全部 CSV
 │       └── run_all.R                    # 一键复现全部数据与 R 教学图
-├── assets/                              # 28 张精选高清图像（零冗余、零隐私数据）
-│   ├── generated/                       # 6 组 R 实绘图（PNG+PDF）+ 6 张定制概念/警示插画
+├── assets/                              # 30 张精选高清图像（零冗余、零隐私数据）
+│   ├── generated/                       # 7 组 R 实绘图 + 6 张定制概念/警示插画
 │   ├── top_journal_clean/               # 7 张原版高清英文顶刊科研图
 │   ├── mcp_covers/                      # 3 张 PlotCase 精选多维图
-│   ├── extracted/                       # 2 张 Society of AI Scientists (2026) 实证图
+│   ├── extracted/                       # 2 张 Society of AI Scientists (2026) 实证图 + 1 张实战组图
 │   └── media/                           # 3 张公开人物与课堂素材
+├── narration/                           # 38 页自动播放预备包（JSON 清单 + 男声 TTS 批量合成脚本）
+│   ├── README.md                        # 神经男声 & 个人声音克隆配音指南
+│   ├── slides_narration.json            # 机器可读 38 页分段台词、停顿秒数与动画触发点
+│   └── tts_batch_generate.py            # edge-tts + ffmpeg 试听/批量合成脚本
 ├── docs/
 │   ├── 01_slide_map_38slides.md         # 六幕 38 页结构与互动总览
 │   ├── 02_resources_and_links.md        # 精选科研绘图、配色美学与 AI 学习资源
-│   ├── 03_asset_manifest.md             # 28 张素材溯源与复现清单
-│   └── 04_ai_html_keynote_methodology.md# 《告别 PowerPoint：用 AI 工程化打造 HTML 幻灯片的方法学》
+│   ├── 03_asset_manifest.md             # 30 张素材溯源与复现清单
+│   ├── 04_ai_html_keynote_methodology.md# 《告别 PowerPoint：用 AI 工程化打造 HTML 幻灯片的方法学》
+│   └── 05_narration_script_30min.md     # 38 页逐张口播旁白与自动播放脚本（约 30 分钟版）
 └── skills/
     └── ai-html-keynote/                 # 开源可复用 Agent Skill（兼容 Antigravity / Claude Code 等）
         ├── SKILL.md                     # 主流程指令（6 阶段 Slides-as-Code 工程闭环）
