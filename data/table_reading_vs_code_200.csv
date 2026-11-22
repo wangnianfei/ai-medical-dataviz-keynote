@@ -1,0 +1,3 @@
+"method","total_tasks","correct","wrong_high_confidence_ge90pct","wrong_other","accuracy_pct"
+"LLM_direct_table_reading",200,171,25,4,85.5
+"LLM_write_and_run_code",200,200,0,0,100

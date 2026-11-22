@@ -1,0 +1,2481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 在医学数据分析与可视化中的应用及体会 — 王年飞</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Hidden SVG Colorblind Simulation Filter (Deuteranopia) -->
+  <svg width="0" height="0" style="position:absolute;">
+    <defs>
+      <filter id="deuteranopia-filter">
+        <feColorMatrix type="matrix" values="
+          0.625 0.375 0     0 0
+          0.700 0.300 0     0 0
+          0     0.300 0.700 0 0
+          0     0     0     1 0" />
+      </filter>
+    </defs>
+  </svg>
+
+  <div id="stage">
+    <div id="deck">
+
+      <!-- ===================================================================
+           P01 · COVER (WARM IVORY EDITORIAL + CIRCULAR/PILL SCIENTIFIC ART SLICES)
+           =================================================================== -->
+      <section class="slide cover-editorial active" data-notes="各位同道大家好，我是王年飞医生。今天我们聊一个既硬核又实用的主题：AI 在医学数据分析与可视化中的应用及体会。右侧的环形图谱、全球分布与单细胞星云图，全部源自 Nature / Science 顶级科研可视化范例。同样面对 AI，为什么有人能做出顶刊级结果甚至证明猜想，有人却觉得不过如此？今天我们从第一性原理聊透这件事。">
+        <div class="cover-layout">
+          <div class="cover-left">
+            <span class="tag red">医学科研与数据美学 · 专题分享</span>
+            <h1 class="title" style="font-size:50px;line-height:1.16;margin-bottom:6px;">
+              AI 在医学数据分析与<br><span class="accent-pine">可视化</span>中的应用及体会
+            </h1>
+            <div style="width:92px;height:6px;border-radius:99px;background:linear-gradient(90deg,var(--terracotta),var(--ochre),var(--pine));"></div>
+            <ul class="phrase-list" style="margin-top:8px;">
+              <li>从<strong>“会聊天”</strong>跃迁到<strong>“会驾驭”</strong></li>
+              <li>给大模型套上 <strong>Model Harness</strong></li>
+              <li>更要给人类装上 <strong>Human Harness</strong></li>
+            </ul>
+            <div style="margin-top:24px;padding-top:18px;border-top:2px solid var(--line);font-size:24px;color:var(--ink-2);line-height:1.55;">
+              <strong style="color:var(--ink-1);font-size:28px;">王年飞</strong> &nbsp;·&nbsp; 医生
+            </div>
+          </div>
+
+          <div class="cover-art-zone">
+            <!-- Delicate editorial concentric arcs & coordinate accents -->
+            <svg class="art-ring-bg" viewBox="0 0 700 730" fill="none">
+              <circle cx="445" cy="230" r="245" stroke="#1b5e55" stroke-opacity="0.18" stroke-width="2" stroke-dasharray="6 8"/>
+              <circle cx="445" cy="230" r="285" stroke="#b07219" stroke-opacity="0.16" stroke-width="1.5"/>
+              <circle cx="150" cy="516" r="152" stroke="#c2412d" stroke-opacity="0.22" stroke-width="2" stroke-dasharray="4 6"/>
+              <path d="M 110 250 Q 250 380 420 560" stroke="#1b5e55" stroke-opacity="0.2" stroke-width="2"/>
+            </svg>
+
+            <!-- Hero Circular Slice: Nature Aging 2024 Age / BMI / Insulin Multi-Track Ring -->
+            <div class="art-slice circle-hero" title="点击高清放大：Nature Aging 年龄/BMI 多轨道环形图">
+              <img src="../assets/top_journal_clean/nature_aging_bmi_ring.png" alt="Nature Aging Multi-Track Clinical Ring" />
+            </div>
+
+            <!-- Top-Left Circular Slice: PlotCase 20-Organ Polar Ring Volcano -->
+            <div class="art-slice circle-polar" title="点击高清放大：20 器官极坐标高级火山图">
+              <img src="../assets/mcp_covers/plotcase_polar_protein_volcano.png" alt="20-Organ Polar Ring Volcano" />
+            </div>
+
+            <!-- Lower-Left Circular Slice: Nature 2024 LUAD Galaxy UMAP -->
+            <div class="art-slice circle-nebula" title="点击高清放大：Nature 肺腺癌单细胞星云图">
+              <img src="../assets/top_journal_clean/nature_2024_luad_galaxy.png" alt="Nature LUAD Single-Cell Galaxy" />
+            </div>
+
+            <!-- Bottom-Right Pill Slice: PlotCase Global Spatial Distribution Map -->
+            <div class="art-slice pill-map" title="点击高清放大：全球高分辨率空间分布地图">
+              <img src="../assets/mcp_covers/plotcase_global_map_warm.png" alt="Global Spatial Distribution Map" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P02 · ACT 01 · 黎曼猜想 Lean 形式化证明（实景人像 + Anthropic + Lean 流程）
+           =================================================================== -->
+      <section class="slide" data-notes="先看刚刚震动全球数学界的大事：2026年11月20日，Anthropic 研究员、数论学者 Levent Alpöge 联合 Claude 发布了黎曼猜想的 Lean 4 形式化证明，代码高达 1740 万行；次日 Lean FRO 与 Mathlib 官方联合确认零报错编译并通过双独立验证器核验。看左侧他在德国奥伯沃尔法赫数学研究所的实景照片——关键在于，主创本人就是顶尖数学家！这里也必须严谨交代边界：机器形式逻辑验证已通过，人类数学界深度审阅与 Clay 官方确认仍在进行中。">
+        <div class="s-head">
+          <span class="kicker">ACT 01 · 震撼破题 · 同样是 AI，为何天壤之别？</span>
+          <div class="head-right"><span class="slide-num">02 / 38</span></div>
+        </div>
+        <h1 class="title">同一把锤子，为什么天壤之别？（一）</h1>
+        <div class="body grid-2-wide-right">
+          <div class="card border-pine" style="justify-content:space-between;gap:14px;">
+            <span class="tag red">2026.11.20–21 震动数学界</span>
+
+            <div class="portrait-banner">
+              <img class="portrait-rect" src="../assets/media/levent_alpoge.jpg" alt="Mathematician Levent Alpöge at Oberwolfach MFO 2024" />
+              <div style="display:flex;flex-direction:column;gap:8px;min-width:0;">
+                <div style="font-size:26px;font-weight:900;color:var(--ink-1);line-height:1.15;">Levent Alpöge</div>
+                <div style="font-size:22px;font-weight:700;color:var(--ink-2);line-height:1.3;">顶尖数论学者（Oberwolfach）</div>
+                <div class="brand-chip">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M13.8 4h3.1L22 20h-3.1l-1.1-3.6h-5.3L11.4 20H8.3L13.8 4zm1.5 4.2-1.8 5.6h3.6l-1.8-5.6zM5.6 4h3L13.7 20h-3L5.6 4z" fill="#ebc06d"/></svg>
+                  <span>ANTHROPIC · Claude</span>
+                </div>
+              </div>
+            </div>
+
+            <ul class="phrase-list compact">
+              <li><strong>黎曼猜想</strong> Lean 4 形式化证明</li>
+              <li><strong>Lean FRO &amp; Mathlib</strong> 零报错编译认证</li>
+              <li><span class="accent-red">严谨边界</span>：人类深度评审仍在进行</li>
+            </ul>
+
+            <div class="action-bar" style="padding-top:0;">
+              <a class="btn primary" href="https://lean-lang.org/" target="_blank" rel="noopener">↗ Lean FRO 官方动态</a>
+              <a class="btn" href="https://github.com/leanprover-community/mathlib4" target="_blank" rel="noopener">↗ Mathlib4</a>
+            </div>
+          </div>
+
+          <div class="stack-v">
+            <div class="kpi-row">
+              <div class="kpi-tile">
+                <div class="kpi-num">1,740万</div>
+                <div class="kpi-label">Lean 4 代码行</div>
+              </div>
+              <div class="kpi-tile">
+                <div class="kpi-num ochre">17.5万+</div>
+                <div class="kpi-label">编译模块文件</div>
+              </div>
+              <div class="kpi-tile">
+                <div class="kpi-num red">0 报错</div>
+                <div class="kpi-label">双验证器通过</div>
+              </div>
+            </div>
+
+            <div class="card" style="flex:1;justify-content:space-between;gap:14px;padding:18px 20px;">
+              <svg viewBox="0 0 760 190" style="width:100%;height:auto;flex:1;">
+                <rect x="6" y="16" width="220" height="158" rx="18" fill="#e6f2f0" stroke="#1b5e55" stroke-width="2.5"/>
+                <text x="116" y="64" text-anchor="middle" font-size="25" font-weight="900" fill="#1b5e55">① 顶尖数学家</text>
+                <text x="116" y="106" text-anchor="middle" font-size="22" font-weight="700" fill="#46413b">构思全局路径</text>
+                <text x="116" y="142" text-anchor="middle" font-size="22" font-weight="800" fill="#1b5e55">定义证明蓝图</text>
+
+                <path d="M232 95 L268 95" stroke="#1b5e55" stroke-width="4.5"/>
+                <polygon points="264,85 280,95 264,105" fill="#1b5e55"/>
+
+                <rect x="282" y="16" width="206" height="158" rx="18" fill="#faf1df" stroke="#b07219" stroke-width="2.5"/>
+                <text x="385" y="64" text-anchor="middle" font-size="25" font-weight="900" fill="#b07219">② Claude Agent</text>
+                <text x="385" y="106" text-anchor="middle" font-size="22" font-weight="700" fill="#46413b">千万行推演展开</text>
+                <text x="385" y="142" text-anchor="middle" font-size="22" font-weight="800" fill="#b07219">循环报错自修复</text>
+
+                <path d="M494 95 L530 95" stroke="#b07219" stroke-width="4.5"/>
+                <polygon points="526,85 542,95 526,105" fill="#b07219"/>
+
+                <rect x="544" y="16" width="210" height="158" rx="18" fill="#fbebe8" stroke="#c2412d" stroke-width="2.5"/>
+                <text x="649" y="64" text-anchor="middle" font-size="25" font-weight="900" fill="#c2412d">③ Lean 4 铁律</text>
+                <text x="649" y="106" text-anchor="middle" font-size="22" font-weight="700" fill="#46413b">逐行逻辑硬核验</text>
+                <text x="649" y="142" text-anchor="middle" font-size="22" font-weight="800" fill="#c2412d">不容一丝幻觉</text>
+              </svg>
+
+              <div class="lean-code-bar">
+                <div style="display:flex;align-items:center;gap:10px;color:#6ed4c1;font-weight:900;margin-bottom:6px;">
+                  <span class="lean-dot"></span>
+                  <span>lean4check · Mathlib4 双验证器通过 (0 errors)</span>
+                </div>
+                <div style="color:#ebc06d;font-weight:800;">
+                  核心公式：顶尖专业深度 × 可验证闭环 × Agent 驾驭力
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P03 · ACT 01 · 936 个 AI 科学家 936 篇论文
+           =================================================================== -->
+      <section class="slide" data-notes="再看同一周（2026年11月19日）发布的重磅研究《A Society of AI Scientists》：35 个人类实验室部署了 936 个自主 AI 智能体，12 周产出 936 篇完整实证研究论文——全部附带可复现代码与数据，甚至自建了同行评审期刊 JAR！对比我们身边很多人打开网页聊两句觉得 AI 不过如此：同一把锤子，为何产出天壤之别？">
+        <div class="s-head">
+          <span class="kicker">ACT 01 · 震撼破题 · 科研生产力跃迁</span>
+          <div class="head-right"><span class="slide-num">03 / 38</span></div>
+        </div>
+        <h1 class="title">同一把锤子，为什么天壤之别？（二）</h1>
+        <div class="body">
+          <div class="phrase-strip">
+            <div class="strip-pill"><strong>2026.11.19</strong> · 35 实验室</div>
+            <div class="strip-pill ochre"><strong>936 个</strong>自主 AI 智能体</div>
+            <div class="strip-pill red">12 周产出 <strong>936 篇实证论文</strong></div>
+          </div>
+
+          <div class="fig-frame" style="flex:1;">
+            <img src="../assets/extracted/society_fig1_ad.png" alt="Society of AI Scientists Fig 1a & 1d" />
+          </div>
+
+          <div class="bottom-bar">
+            <span style="font-size:22px;font-weight:700;color:var(--ink-2);"><em>A Society of AI Scientists</em> (Nov 2026, Fig. 1a &amp; 1d · 点击图片放大)</span>
+            <a class="btn primary" href="https://github.com/alphaXiv/OpenResearch" target="_blank" rel="noopener">↗ OpenResearch 开源仓库</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P04 · ACT 01 · 核心观念一：AI 急剧放大差距
+           =================================================================== -->
+      <section class="slide" data-notes="这是今天要树立的第一个核心观念：千万不要再信“AI 会拉平人与人之间的差距”！互联网时代，渠道普惠让大众共享长尾红利；AI 时代正相反，语法与苦力执行的旧门槛被抹平后，真正会驾驭 AI 的专业人士效率被放大百倍，人与人的差距只会急剧拉大。">
+        <div class="s-head">
+          <span class="kicker">ACT 01 · 核心观念确立</span>
+          <div class="head-right"><span class="slide-num">04 / 38</span></div>
+        </div>
+        <h1 class="title">第一观念：AI 不会缩小差距，只会<span class="accent-red">急剧放大</span>差距</h1>
+        <div class="body grid-visual-right">
+          <div class="card border-red" style="justify-content:center;gap:22px;">
+            <ul class="phrase-list red">
+              <li><strong>互联网时代</strong>：渠道普惠，长尾分润</li>
+              <li><strong>AI 时代</strong>：产出向头部极化</li>
+              <li><strong>旧门槛消失</strong>：语法与重复操作</li>
+              <li><strong>新杠杆暴涨</strong>：专业深度 × 驾驭力</li>
+            </ul>
+            <div class="quote-box">
+              <div class="q-text">“执行趋近免费，差距全在驾驭。”</div>
+            </div>
+          </div>
+
+          <div class="fig-frame" style="padding:14px;">
+            <svg viewBox="0 0 820 520" style="width:100%;height:100%;">
+              <!-- Left Panel: Internet Era -->
+              <rect x="14" y="16" width="384" height="486" rx="18" fill="#f7f4ee" stroke="#d5ccc0" stroke-width="2.5"/>
+              <text x="206" y="64" text-anchor="middle" font-size="27" font-weight="900" fill="#1b5e55">互联网时代 · 长尾普惠</text>
+              <line x1="54" y1="406" x2="366" y2="406" stroke="#46413b" stroke-width="3"/>
+              <line x1="54" y1="406" x2="54" y2="120" stroke="#46413b" stroke-width="3"/>
+              <path d="M54 402 C110 390, 145 190, 210 190 C275 190, 310 390, 362 402 Z" fill="#1b5e55" fill-opacity="0.22"/>
+              <path d="M54 402 C110 390, 145 190, 210 190 C275 190, 310 390, 362 402" fill="none" stroke="#1b5e55" stroke-width="5"/>
+              <text x="210" y="310" text-anchor="middle" font-size="24" font-weight="900" fill="#1b5e55">宽阔的中坚受益层</text>
+              <text x="210" y="456" text-anchor="middle" font-size="23" font-weight="800" fill="#46413b">个体专业能力 →</text>
+
+              <!-- Right Panel: AI Agent Era -->
+              <rect x="422" y="16" width="384" height="486" rx="18" fill="#fbebe8" stroke="#e2a59b" stroke-width="2.5"/>
+              <text x="614" y="64" text-anchor="middle" font-size="27" font-weight="900" fill="#c2412d">AI 智能体时代 · 指数极化</text>
+              <line x1="462" y1="406" x2="774" y2="406" stroke="#46413b" stroke-width="3"/>
+              <line x1="462" y1="406" x2="462" y2="120" stroke="#46413b" stroke-width="3"/>
+              <path d="M462 402 C548 398, 646 384, 704 294 C736 244, 756 172, 768 124 L768 402 Z" fill="#c2412d" fill-opacity="0.22"/>
+              <path d="M462 402 C548 398, 646 384, 704 294 C736 244, 756 172, 768 124" fill="none" stroke="#c2412d" stroke-width="5.5"/>
+              <circle cx="764" cy="134" r="9" fill="#c2412d"/>
+              <rect x="520" y="114" width="228" height="84" rx="12" fill="#c2412d"/>
+              <text x="634" y="150" text-anchor="middle" font-size="22" font-weight="900" fill="#ffffff">专业人士 + Agent</text>
+              <text x="634" y="182" text-anchor="middle" font-size="21" font-weight="700" fill="#fdece8">黎曼 / 936 论文</text>
+              <text x="572" y="366" text-anchor="middle" font-size="22" font-weight="800" fill="#6e665d">停在网页聊天框</text>
+              <text x="618" y="456" text-anchor="middle" font-size="23" font-weight="800" fill="#46413b">专业 × AI 驾驭度 →</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P05 · ACT 02 · 大模型只是一个函数 y = f(x) + Garrity 讲课视频截图
+           =================================================================== -->
+      <section class="slide" data-notes="接下来进入第一性原理，帮各位临床同道彻底祛魅大模型。大模型不是有自主意识的神脑，它本质上就是一个巨大的数学函数 y = f(x)。看左侧威廉姆斯学院数学教授 Thomas A. Garrity 在 PCMI《On Mathematical Maturity》演讲的实景截图，他站在黑板前反复强调：Functions describe the world — It's all function! 当大模型训练完权重固定后，函数 f 对全世界所有人完全相同，决定输出 y 好坏的唯一抓手，就是你的输入 x！">
+        <div class="s-head">
+          <span class="kicker">ACT 02 · 第一性原理 · 用函数思维彻底祛魅</span>
+          <div class="head-right"><span class="slide-num">05 / 38</span></div>
+        </div>
+        <h1 class="title">祛魅大模型：它只是一个函数 <span class="accent-pine">y = f(x)</span></h1>
+        <div class="body grid-2">
+          <!-- Left: Real Thomas Garrity Lecture Video Screenshot + Quote -->
+          <div class="card border-red" style="gap:14px;background:#1b1815;color:var(--ink-light);border-color:#352f29;">
+            <div class="media-thumb" style="height:295px;border-color:rgba(235,192,109,0.4);">
+              <img src="../assets/media/garrity_lecture_1_hd.jpg" alt="Thomas Garrity PCMI Lecture On Mathematical Maturity" />
+              <div style="position:absolute;bottom:12px;left:12px;background:rgba(27,24,21,0.88);color:#ebc06d;padding:5px 14px;border-radius:999px;font-size:22px;font-weight:800;">
+                ▶ PCMI 经典演讲 · Prof. Thomas Garrity
+              </div>
+            </div>
+            <div style="font-family:Georgia,serif;font-size:30px;font-weight:700;line-height:1.35;color:#faf6ee;">
+              “Functions describe the world…<br><span style="color:#6ed4c1;">It's all function!</span>”
+            </div>
+            <div class="action-bar" style="padding-top:0;">
+              <a class="btn-demo btn" href="https://www.youtube.com/watch?v=zHU1xH6Ogs4" target="_blank" rel="noopener">▶ 打开 Garrity 教授演讲原片</a>
+            </div>
+          </div>
+
+          <!-- Right: Function Diagram + 3 Crisp Pillars -->
+          <div class="stack-v">
+            <div class="card" style="flex:1.1;justify-content:center;align-items:center;">
+              <svg viewBox="0 0 640 245" style="width:100%;height:100%;">
+                <rect x="10" y="54" width="174" height="132" rx="18" fill="#e6f2f0" stroke="#1b5e55" stroke-width="3"/>
+                <text x="97" y="108" text-anchor="middle" font-size="32" font-weight="900" fill="#1b5e55">输入 x</text>
+                <text x="97" y="152" text-anchor="middle" font-size="22" font-weight="800" fill="#46413b">文字 / 上下文</text>
+
+                <path d="M190 120 L236 120" stroke="#1b5e55" stroke-width="4.5"/>
+                <polygon points="232,110 250,120 232,130" fill="#1b5e55"/>
+
+                <rect x="252" y="34" width="152" height="172" rx="22" fill="#1b1815"/>
+                <text x="328" y="106" text-anchor="middle" font-size="38" font-weight="900" fill="#6ed4c1">f ( · )</text>
+                <text x="328" y="148" text-anchor="middle" font-size="22" font-weight="800" fill="#faf6ee">权重固定</text>
+                <text x="328" y="182" text-anchor="middle" font-size="21" font-weight="800" fill="#ebc06d">人人相同</text>
+
+                <path d="M410 120 L456 120" stroke="#c2412d" stroke-width="4.5"/>
+                <polygon points="452,110 470,120 452,130" fill="#c2412d"/>
+
+                <rect x="472" y="54" width="158" height="132" rx="18" fill="#fbebe8" stroke="#c2412d" stroke-width="3"/>
+                <text x="551" y="108" text-anchor="middle" font-size="32" font-weight="900" fill="#c2412d">输出 y</text>
+                <text x="551" y="152" text-anchor="middle" font-size="22" font-weight="800" fill="#46413b">下一串文字</text>
+              </svg>
+            </div>
+            <div class="card border-pine" style="flex:0.9;justify-content:center;">
+              <ul class="phrase-list">
+                <li><strong>权重锁定</strong> ＝ 数学函数 <strong>f</strong> 固定不变</li>
+                <li>文字进（<strong>x</strong>）→ 预测文字出（<strong>y</strong>）</li>
+                <li>唯一抓手：精心构造<strong>输入 x</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P06 · ACT 02 · 交互动画：文字接龙与上下文分化
+           =================================================================== -->
+      <section class="slide" data-notes="大模型到底怎么运转？它就是纯粹的“文字接龙”：输入一串字 x，函数预测出下一个字，再把新字拼回原来的输入里，整体作为新的 x 再进函数循环！整串接龙的长度就是“上下文（Context）”。现在我现场点击演示：对比精准开头与模糊开头，看每一步概率分布如何彻底分化！">
+        <div class="s-head">
+          <span class="kicker">ACT 02 · 自回归推理与上下文分化</span>
+          <div class="head-right">
+            <span class="demo-cue">▶ 现场点击互动演示</span>
+            <span class="slide-num">06 / 38</span>
+          </div>
+        </div>
+        <h1 class="title">大模型如何运转？<span class="accent-pine">文字接龙</span>与上下文</h1>
+        <div class="body grid-visual-left">
+          <div class="card border-pine" style="gap:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+              <div style="display:flex;gap:8px;">
+                <button class="btn active-pill" data-chain-mode="good">✅ 精准开头</button>
+                <button class="btn" data-chain-mode="bad">❌ 模糊开头</button>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-demo" id="btn-chain-step">▶ 单步预测</button>
+                <button class="btn primary" id="btn-chain-auto">⏩ 自动接龙</button>
+                <button class="btn" id="btn-chain-reset">↺</button>
+              </div>
+            </div>
+
+            <div id="chain-step-badge" class="tag ochre" style="font-family:var(--font-mono);">当前上下文长度</div>
+
+            <div class="token-stream" id="chain-stream"></div>
+
+            <div style="background:#ffffff;border:1.5px solid var(--line);border-radius:12px;padding:12px 16px;display:flex;flex-direction:column;gap:8px;">
+              <div style="font-size:22px;font-weight:800;color:var(--pine);">f(x) 计算出的「下一词」Top-3 概率：</div>
+              <div id="chain-probs" style="display:flex;flex-direction:column;gap:8px;"></div>
+            </div>
+
+            <div id="chain-verdict" style="padding:10px 16px;border-radius:10px;border:2px solid var(--line);font-size:22px;font-weight:800;"></div>
+          </div>
+
+          <div class="card border-ochre" style="justify-content:center;gap:18px;">
+            <h3>为什么开头至关重要？</h3>
+            <ul class="phrase-list ochre">
+              <li>输出拼回输入，循环<strong>文字接龙</strong></li>
+              <li>整串长度 ＝ <strong>上下文 Context</strong></li>
+              <li>上下文 ＝ <strong>f(x) 全部推理原料</strong></li>
+              <li>起始一步偏，后续<strong>步步跑偏</strong></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P07 · ACT 02 · 热词祛魅：从提示词到 Agent/Harness
+           =================================================================== -->
+      <section class="slide" data-notes="过去两年 AI 圈热词满天飞：Prompt、Workflow、Skill、MCP、Memory、Agent、Harness……本质全在干同一件事——自动化帮你构造更高质量的输入 x！大模型是奔腾野马，外部套上的一切缰绳护栏就是 Harness。课后强烈推荐看 B 站【闪客】这期底层拆解视频。">
+        <div class="s-head">
+          <span class="kicker">ACT 02 · 热词祛魅 · 万变不离其宗</span>
+          <div class="head-right"><span class="slide-num">07 / 38</span></div>
+        </div>
+        <h1 class="title">热词祛魅：从提示词到 Agent，全在治理 <span class="accent-red">x</span></h1>
+        <div class="body">
+          <div class="phrase-strip">
+            <div class="strip-pill">Prompt → RAG → Agent → <strong>Harness</strong></div>
+            <div class="strip-pill ochre">热词常变，<strong>构造输入 x 本质不变</strong></div>
+            <div class="strip-pill red">模型 ＝ 野马；外部一切 ＝ <strong>缰绳</strong></div>
+          </div>
+
+          <div class="fig-frame" style="flex:1;padding:12px;">
+            <svg viewBox="0 0 1280 415" style="width:100%;height:100%;">
+              <!-- Stage 1 -->
+              <rect x="16" y="205" width="276" height="186" rx="18" fill="#efeae0" stroke="#a69c8e" stroke-width="2.5"/>
+              <text x="154" y="256" text-anchor="middle" font-size="26" font-weight="900" fill="#46413b">1. 提示词工程</text>
+              <text x="154" y="298" text-anchor="middle" font-size="22" font-weight="700" fill="#6e665d">Prompt</text>
+              <text x="154" y="348" text-anchor="middle" font-size="22" font-weight="800" fill="#1d1b18">手工单次拼装 x</text>
+
+              <path d="M298 276 L332 246" stroke="#6e665d" stroke-width="4.5"/>
+
+              <!-- Stage 2 -->
+              <rect x="338" y="142" width="276" height="249" rx="18" fill="#faf1df" stroke="#b07219" stroke-width="2.5"/>
+              <text x="476" y="196" text-anchor="middle" font-size="26" font-weight="900" fill="#b07219">2. 工作流 / RAG</text>
+              <text x="476" y="242" text-anchor="middle" font-size="22" font-weight="700" fill="#46413b">固定流水线</text>
+              <text x="476" y="296" text-anchor="middle" font-size="22" font-weight="800" fill="#1d1b18">按需把文献片段</text>
+              <text x="476" y="332" text-anchor="middle" font-size="22" font-weight="800" fill="#1d1b18">自动塞进输入 x</text>
+
+              <path d="M620 218 L654 188" stroke="#b07219" stroke-width="4.5"/>
+
+              <!-- Stage 3 -->
+              <rect x="660" y="80" width="282" height="311" rx="18" fill="#e6f2f0" stroke="#1b5e55" stroke-width="3"/>
+              <text x="801" y="134" text-anchor="middle" font-size="27" font-weight="900" fill="#1b5e55">3. 智能体 Agent</text>
+              <text x="801" y="178" text-anchor="middle" font-size="22" font-weight="800" fill="#46413b">Skill · MCP · Memory</text>
+              <text x="801" y="236" text-anchor="middle" font-size="22" font-weight="800" fill="#1d1b18">读文件 · 跑代码</text>
+              <text x="801" y="274" text-anchor="middle" font-size="22" font-weight="800" fill="#1d1b18">结果循环喂回 x</text>
+              <text x="801" y="338" text-anchor="middle" font-size="22" font-weight="900" fill="#1b5e55">上下文自动化引擎</text>
+
+              <path d="M948 152 L982 122" stroke="#1b5e55" stroke-width="4.5"/>
+
+              <!-- Stage 4 -->
+              <rect x="988" y="20" width="276" height="371" rx="20" fill="#1b1815" stroke="#c2412d" stroke-width="3.5"/>
+              <text x="1126" y="78" text-anchor="middle" font-size="30" font-weight="900" fill="#ebc06d">4. Harness</text>
+              <text x="1126" y="122" text-anchor="middle" font-size="23" font-weight="800" fill="#faf6ee">上下文工程总成</text>
+              <text x="1126" y="182" text-anchor="middle" font-size="23" font-weight="800" fill="#6ed4c1">缰绳 · 马鞍 · 护栏</text>
+              <text x="1126" y="238" text-anchor="middle" font-size="22" font-weight="700" fill="#d4cbc0">压控噪声 + 检验闭环</text>
+              <rect x="1012" y="302" width="228" height="58" rx="12" fill="#c2412d"/>
+              <text x="1126" y="339" text-anchor="middle" font-size="22" font-weight="900" fill="#ffffff">全在构造极致 x</text>
+            </svg>
+          </div>
+
+          <div class="bottom-bar">
+            <span style="font-size:22px;font-weight:800;color:var(--ink-1);">📺 延伸必看：B 站【闪客】底层逻辑拆解</span>
+            <a class="btn terracotta" href="https://www.bilibili.com/video/BV1ojfDBSEPv" target="_blank" rel="noopener">↗ 直达 B 站视频</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P08 · ACT 03 · 透视单次请求：6 层上下文解剖
+           =================================================================== -->
+      <section class="slide" data-notes="很多人以为，发一句话给 Agent，大模型就只看到这一句话。错！背后 Agent 悄悄塞进了系统提示词、长期记忆、所有挂载的 Skill 与 MCP 工具定义、以及整段历史报错日志！这就是为什么不同 Agent 表现不同——高手的克制，就是只挂当前必需工具，守住信噪比。">
+        <div class="s-head">
+          <span class="kicker">ACT 03 · 驾驭上下文 · 切开 Agent 黑盒</span>
+          <div class="head-right"><span class="slide-num">08 / 38</span></div>
+        </div>
+        <h1 class="title">透视单次请求：Agent 悄悄注入了哪些上下文？</h1>
+        <div class="body grid-visual-left">
+          <div class="fig-frame" style="padding:12px;">
+            <svg viewBox="0 0 820 530" style="width:100%;height:100%;">
+              <!-- Left: Bloated -->
+              <text x="200" y="36" text-anchor="middle" font-size="25" font-weight="900" fill="#c2412d">❌ 臃肿配置（低信噪比）</text>
+              <rect x="24" y="54" width="352" height="62" rx="12" fill="#2c2723"/>
+              <text x="200" y="94" text-anchor="middle" font-size="22" font-weight="800" fill="#faf6ee">① System Prompt 人设铁律</text>
+
+              <rect x="24" y="124" width="352" height="58" rx="12" fill="#46413b"/>
+              <text x="200" y="162" text-anchor="middle" font-size="22" font-weight="800" fill="#faf6ee">② Memory 跨会话记忆</text>
+
+              <rect x="24" y="190" width="352" height="72" rx="12" fill="#b07219"/>
+              <text x="200" y="234" text-anchor="middle" font-size="22" font-weight="900" fill="#ffffff">③ 20+ Skills / MCP（白烧算力）</text>
+
+              <rect x="24" y="270" width="352" height="130" rx="12" fill="#c2412d"/>
+              <text x="200" y="326" text-anchor="middle" font-size="23" font-weight="900" fill="#ffffff">④ 冗长历史 + 报错栈</text>
+              <text x="200" y="366" text-anchor="middle" font-size="21" font-weight="700" fill="#fdece8">未清理试错垃圾占 60%+</text>
+
+              <rect x="24" y="408" width="352" height="52" rx="12" fill="#6e665d"/>
+              <text x="200" y="443" text-anchor="middle" font-size="21" font-weight="800" fill="#ffffff">⑤ 工具原始长返回</text>
+
+              <rect x="24" y="468" width="352" height="52" rx="12" fill="#1b5e55"/>
+              <text x="200" y="503" text-anchor="middle" font-size="22" font-weight="900" fill="#ffffff">⑥ 你的当前输入（冰山一角）</text>
+
+              <!-- Right: Lean -->
+              <text x="616" y="36" text-anchor="middle" font-size="25" font-weight="900" fill="#1b5e55">✅ 高手配置（高信噪比）</text>
+              <rect x="440" y="54" width="352" height="62" rx="12" fill="#2c2723"/>
+              <text x="616" y="94" text-anchor="middle" font-size="22" font-weight="800" fill="#faf6ee">① 精炼 System Prompt</text>
+
+              <rect x="440" y="124" width="352" height="62" rx="12" fill="#1b5e55"/>
+              <text x="616" y="164" text-anchor="middle" font-size="22" font-weight="800" fill="#ffffff">② 仅挂 1–2 个必需 Skill/MCP</text>
+
+              <rect x="440" y="194" width="352" height="64" rx="12" fill="#b07219"/>
+              <text x="616" y="235" text-anchor="middle" font-size="22" font-weight="800" fill="#ffffff">③ /compact 净化后核心摘要</text>
+
+              <rect x="440" y="266" width="352" height="72" rx="12" fill="#c2412d"/>
+              <text x="616" y="311" text-anchor="middle" font-size="23" font-weight="900" fill="#ffffff">④ 清晰高密度的当前指令</text>
+
+              <rect x="440" y="348" width="352" height="172" rx="14" fill="#e6f2f0" stroke="#1b5e55" stroke-width="3" stroke-dasharray="8 6"/>
+              <text x="616" y="424" text-anchor="middle" font-size="26" font-weight="900" fill="#1b5e55">70%+ 充裕推理空间</text>
+              <text x="616" y="466" text-anchor="middle" font-size="22" font-weight="800" fill="#46413b">注意力聚焦 · 零中段遗忘</text>
+            </svg>
+          </div>
+
+          <div class="card border-pine" style="justify-content:space-between;gap:14px;">
+            <span class="tag">信噪比解剖 · 冰山定律</span>
+
+            <div class="specimen-box" style="padding:14px 16px;gap:12px;">
+              <div style="font-size:22px;font-weight:900;color:var(--ink-1);">单次请求真实 Token 构成</div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:22px;font-weight:800;color:var(--terracotta);">
+                  <span>臃肿插件 + 历史垃圾</span><span>92%</span>
+                </div>
+                <div style="height:18px;border-radius:99px;background:#efeae0;overflow:hidden;margin-top:5px;display:flex;">
+                  <div style="width:92%;height:100%;background:var(--terracotta);"></div>
+                  <div style="width:8%;height:100%;background:var(--pine);"></div>
+                </div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:22px;font-weight:800;color:var(--pine);">
+                  <span>克制挂载（留白推理）</span><span>72%</span>
+                </div>
+                <div style="height:18px;border-radius:99px;background:#efeae0;overflow:hidden;margin-top:5px;display:flex;">
+                  <div style="width:28%;height:100%;background:var(--ochre);"></div>
+                  <div style="width:72%;height:100%;background:var(--pine);"></div>
+                </div>
+              </div>
+              <div style="font-size:22px;font-weight:700;color:var(--ink-3);line-height:1.35;">
+                每多挂 1 个 MCP，每轮对话都在重复烧上下文！
+              </div>
+            </div>
+
+            <ul class="phrase-list compact">
+              <li>用户输入只是<strong>冰山一角</strong></li>
+              <li>不同 Agent 隐性开销<strong>差距巨大</strong></li>
+              <li><span class="accent-pine">高手克制</span>：按需启用，用完即关</li>
+            </ul>
+
+            <div style="padding:12px 16px;border-radius:12px;background:#1b1815;color:#ebc06d;font-size:22px;font-weight:900;text-align:center;">
+              铁律：守住信噪比，绝不常驻冗余插件
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P09 · ACT 03 · 物理极限：O(N²) 与中间迷失
+           =================================================================== -->
+      <section class="slide" data-notes="为什么不能把十几篇 PDF 直接拖进对话窗口？两个硬性物理极限：第一，标准自注意力计算量随长度呈 O(N²) 平方级暴涨，长度增加 10 倍，计算量暴涨 100 倍！哪怕标称 1M Token 也绝不能塞满；第二，窗口越长，模型越容易出现“中间迷失（Lost in the Middle）”和上下文腐烂，质量骤降。">
+        <div class="s-head">
+          <span class="kicker">ACT 03 · 驾驭上下文 · 物理与认知极限</span>
+          <div class="head-right"><span class="slide-num">09 / 38</span></div>
+        </div>
+        <h1 class="title">物理极限：为什么上下文越长反而<span class="accent-red">“变傻”</span>？</h1>
+        <div class="body">
+          <div class="phrase-strip">
+            <div class="strip-pill">算力 <strong>O(N²)</strong> 暴涨（长 ×10 → 算力 ×100）</div>
+            <div class="strip-pill red">标称 1M Token ≠ 硬塞几十篇 PDF</div>
+            <div class="strip-pill ochre">顽疾：<strong>中间迷失 + 上下文腐烂</strong></div>
+          </div>
+
+          <div class="fig-frame" style="flex:1;">
+            <img src="../assets/generated/06_context_scaling_and_rot.png" alt="O(N^2) 算力与中间迷失双图" />
+          </div>
+
+          <div class="bottom-bar">
+            <span style="font-size:22px;font-weight:700;color:var(--ink-2);">R 脚本本地可复现科学双图（点击图片高清放大）</span>
+            <button class="btn btn-demo" data-run="06_context_rot">⚡ 运行真实 R 代码出图</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P10 · ACT 03 · 交互演示：压缩 / 开新窗 / 记忆
+           =================================================================== -->
+      <section class="slide" data-notes="既然窗口会腐烂，实战中到底怎么管？三条清晰决策铁律：第一，同一长任务做完一个里程碑（如清洗完准备画图），立刻执行 /compact 剥离试错垃圾；第二，切换无关新课题直接开新窗口；第三，跨项目长期规范写进 Memory 或 Skill。现在我现场点击高亮按钮执行 /compact！">
+        <div class="s-head">
+          <span class="kicker">ACT 03 · 上下文实战治理</span>
+          <div class="head-right">
+            <span class="demo-cue">▶ 现场点击 /compact</span>
+            <span class="slide-num">10 / 38</span>
+          </div>
+        </div>
+        <h1 class="title">上下文实战治理：<span class="accent-pine">压缩</span>、开新窗与记忆</h1>
+        <div class="body grid-visual-left">
+          <div class="terminal">
+            <div class="term-bar">
+              <span class="term-dot" style="background:#e06c58;"></span>
+              <span class="term-dot" style="background:#ebc06d;"></span>
+              <span class="term-dot" style="background:#6ed4c1;"></span>
+              <span style="margin-left:8px;">agent-session · 上下文治理</span>
+            </div>
+            <div class="term-body" style="display:flex;flex-direction:column;gap:14px;">
+              <div id="ctx-pct-label" style="font-size:22px;font-weight:800;color:#ebc06d;">
+                上下文占用：92%（临近溢出，开始中段遗忘）
+              </div>
+              <div class="ctx-bar-bg">
+                <div id="ctx-seg-sys" class="ctx-seg" style="width:12%;background:#46413b;">系统 12%</div>
+                <div id="ctx-seg-noise" class="ctx-seg" style="width:62%;background:#c2412d;">报错 / 废代码 62%</div>
+                <div id="ctx-seg-core" class="ctx-seg" style="width:18%;background:#1b5e55;">核心 18%</div>
+              </div>
+              <div id="compact-log" style="flex:1;background:#13110f;padding:16px 18px;border-radius:12px;border:1px solid #352f29;font-size:22px;line-height:1.6;">
+                <span class="t-warn">⚠ 警告：当前会话已累计 184,000 tokens（92%）</span><br>
+                <span class="t-dim">充斥历史报错、废弃代码、冗长中间表…</span><br>
+                <span class="t-prompt">&gt;</span> <span class="t-cmd">点击下方高亮按钮现场执行 /compact</span>
+              </div>
+              <div style="display:flex;gap:12px;">
+                <button class="btn btn-demo" id="btn-run-compact">⚡ 点击执行 /compact 压缩</button>
+                <button class="btn" id="btn-reset-compact">↺ 还原 92%</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="stack-v">
+            <div class="card border-pine" style="flex:1;justify-content:center;">
+              <h3>① 何时 <span class="accent-pine">/compact</span>？</h3>
+              <p>阶段完工时（清洗完→画图）</p>
+            </div>
+            <div class="card border-red" style="flex:1;justify-content:center;">
+              <h3>② 何时<span class="accent-red">开新窗口</span>？</h3>
+              <p>换无关课题或思路被污染</p>
+            </div>
+            <div class="card border-ochre" style="flex:1;justify-content:center;">
+              <h3>③ 何时用 <span class="accent-ochre">Memory</span>？</h3>
+              <p>跨项目长期规范（配色/字体）</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P11 · ACT 03 · 多智能体与子代理：上下文隔离的利与弊（含 KV Cache 动画）
+           =================================================================== -->
+      <section class="slide" data-notes="讲完单窗口压缩，再看更进阶的上下文策略：多智能体协作与子代理（Subagent）！什么时候该派子代理？当任务之间依赖性弱、没有强上下游串联、可以并行分工时——比如批量核对 20 篇参考文献，或者就像刚才我们制作这套幻灯片时，Antigravity 自己就派出了多个子代理并行画图！好处极其明显：给子代理单独开一个 100% 纯净的独立上下文，不受主会话噪声干扰，干得又快又准。但千万小心它的致命陷阱：如果子代理不懂克制，把几万字原始全文直接吐回主代理，主代理上下文瞬间爆炸！更本质的硬件真相是：上下文存在云端厂商昂贵的 GPU 显存 KV Cache 里，不像我们本地电脑内存满了还能借 SSD 虚拟内存扩容——KV Cache 一旦被挤爆，轻则触发重算降速，重则直接截断降质！现场点击切换两个模式，直观感受一下！">
+        <div class="s-head">
+          <span class="kicker">ACT 03 · 上下文进阶 · 多智能体与子代理协作</span>
+          <div class="head-right">
+            <span class="demo-cue">▶ 切换模式演示 KV Cache</span>
+            <span class="slide-num">11 / 38</span>
+          </div>
+        </div>
+        <h1 class="title">多智能体与子代理：<span class="accent-pine">隔离红利</span>与 <span class="accent-red">KV Cache</span> 陷阱</h1>
+        <div class="body grid-visual-left">
+          <!-- Left: Interactive Subagent & Cloud GPU KV Cache Simulator -->
+          <div class="sa-panel">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+              <div style="display:flex;gap:8px;">
+                <button class="btn active-pill" data-sa-mode="good">✅ 精炼摘要回传</button>
+                <button class="btn" data-sa-mode="bad">💥 长输出挤爆演示</button>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-demo" id="btn-sa-run">⚡ 运行协同演示</button>
+                <button class="btn" id="btn-sa-reset">↺</button>
+              </div>
+            </div>
+
+            <div class="kv-header-row">
+              <span id="kv-pct-label" style="color:#6ed4c1;">主代理云端 KV Cache：38%（健康）</span>
+            </div>
+
+            <div class="kv-meter-track" id="kv-meter-track">
+              <div id="kv-seg-base" class="kv-seg" style="width:38%;background:#46413b;">主窗核心 38%</div>
+              <div id="kv-seg-ret" class="kv-seg" style="width:0%;background:#1b5e55;"></div>
+            </div>
+
+            <div class="sa-bus-row" id="sa-bus-row">
+              <span>↓ 待派发</span><span>↓ 待派发</span><span>↓ 待派发</span>
+            </div>
+
+            <div class="sa-workers-grid">
+              <div class="sa-worker-card" id="sa-w-1">
+                <div style="font-size:22px;font-weight:900;color:#ebc06d;">子代理 A · 核文献</div>
+                <div style="font-size:22px;color:#d4cbc0;font-weight:700;">独立窗 · 20 篇 PMID</div>
+                <div class="sa-mini-bar"><div class="sa-mini-fill" id="sa-fill-1"></div></div>
+                <div id="sa-stat-1" style="font-size:22px;font-weight:700;color:#b8afa4;line-height:1.3;">纯净隔离 · 待命</div>
+              </div>
+              <div class="sa-worker-card" id="sa-w-2">
+                <div style="font-size:22px;font-weight:900;color:#6ed4c1;">子代理 B · 并行绘图</div>
+                <div style="font-size:22px;color:#d4cbc0;font-weight:700;">独立窗 · 渲染成图</div>
+                <div class="sa-mini-bar"><div class="sa-mini-fill" id="sa-fill-2"></div></div>
+                <div id="sa-stat-2" style="font-size:22px;font-weight:700;color:#b8afa4;line-height:1.3;">纯净隔离 · 待命</div>
+              </div>
+              <div class="sa-worker-card" id="sa-w-3">
+                <div style="font-size:22px;font-weight:900;color:#f28b78;">子代理 C · 查指南</div>
+                <div style="font-size:22px;color:#d4cbc0;font-weight:700;">独立窗 · 原文摘录</div>
+                <div class="sa-mini-bar"><div class="sa-mini-fill" id="sa-fill-3"></div></div>
+                <div id="sa-stat-3" style="font-size:22px;font-weight:700;color:#b8afa4;line-height:1.3;">纯净隔离 · 待命</div>
+              </div>
+            </div>
+
+            <div class="sa-verdict-box" id="sa-verdict-box">
+              👆 点击「⚡ 运行协同演示」：观察子代理独立隔离 + 仅回传精炼摘要
+            </div>
+          </div>
+
+          <!-- Right: Crisp Decision Rules & Hardware Reality -->
+          <div class="stack-v">
+            <div class="card border-pine" style="flex:1;justify-content:center;gap:10px;">
+              <h3 style="margin:0;">✅ 何时派子代理？（利）</h3>
+              <ul class="phrase-list compact">
+                <li><strong>弱依赖可并行</strong>：核文献 / 批量绘图</li>
+                <li>本课件即由 <strong>Antigravity 子代理</strong>并行出图</li>
+                <li><strong>独立纯净上下文</strong>：无污染、精度更高</li>
+              </ul>
+            </div>
+
+            <div class="card border-red" style="flex:1.15;justify-content:space-between;gap:10px;">
+              <h3 style="margin:0;">⚠ 致命陷阱：KV Cache 挤爆（弊）</h3>
+              <ul class="phrase-list red compact">
+                <li><strong>长输出回灌</strong> → 瞬间挤爆主窗</li>
+                <li>上下文驻留<strong>云端 GPU 显存 KV Cache</strong></li>
+                <li><strong>≠ 本地内存</strong>（无法借 SSD 虚拟扩容）</li>
+              </ul>
+              <div style="padding:10px 14px;border-radius:10px;background:var(--ochre-soft);border-left:5px solid var(--ochre);font-size:22px;font-weight:900;color:#7c4d0c;">
+                铁律：子代理只回传极简摘要与路径！
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P11 · ACT 03 · RAG 原理与 PDF 预处理
+           =================================================================== -->
+      <section class="slide" data-notes="写正式医学论文或综述时，手里动辄几百篇指南和文献，绝不能直接硬塞进对话窗口！正确做法是先做文本预处理：把复杂排版 PDF 转为干净的 Markdown，语义切片向量化后常驻在本地电脑，让 Agent 通过 RAG 按需召回。两大不可替代优点：一极省上下文，二强力防幻觉、句句可溯源原文！">
+        <div class="s-head">
+          <span class="kicker">ACT 03 · 长文本终极外挂 · RAG 检索增强</span>
+          <div class="head-right"><span class="slide-num">12 / 38</span></div>
+        </div>
+        <h1 class="title">长文本终极外挂：<span class="accent-pine">RAG</span> 原理与预处理</h1>
+        <div class="body">
+          <div class="phrase-strip">
+            <div class="strip-pill red">禁忌：数百篇 PDF 绝不硬塞窗口</div>
+            <div class="strip-pill ochre">预处理：<strong>PDF → Markdown → 切片</strong></div>
+            <div class="strip-pill">双优点：<strong>省上下文 + 强力防幻觉</strong></div>
+          </div>
+
+          <div class="fig-frame" style="flex:1;padding:14px;">
+            <svg viewBox="0 0 1280 420" style="width:100%;height:100%;">
+              <!-- Node 1 -->
+              <rect x="14" y="76" width="234" height="258" rx="18" fill="#fbebe8" stroke="#c2412d" stroke-width="3"/>
+              <text x="131" y="138" text-anchor="middle" font-size="26" font-weight="900" fill="#c2412d">数百篇文献</text>
+              <text x="131" y="190" text-anchor="middle" font-size="22" font-weight="700" fill="#46413b">NCCN / CSCO 指南</text>
+              <text x="131" y="232" text-anchor="middle" font-size="22" font-weight="700" fill="#46413b">临床 RCT 原文</text>
+              <text x="131" y="294" text-anchor="middle" font-size="22" font-weight="900" fill="#c2412d">❌ 直接拖入即爆</text>
+
+              <path d="M254 205 L292 205" stroke="#46413b" stroke-width="4.5"/>
+              <polygon points="288,195 306,205 288,215" fill="#46413b"/>
+
+              <!-- Node 2 -->
+              <rect x="308" y="76" width="238" height="258" rx="18" fill="#faf1df" stroke="#b07219" stroke-width="3"/>
+              <text x="427" y="138" text-anchor="middle" font-size="26" font-weight="900" fill="#b07219">① 文本预处理</text>
+              <text x="427" y="192" text-anchor="middle" font-size="23" font-weight="900" fill="#1d1b18">PDF → Markdown</text>
+              <text x="427" y="240" text-anchor="middle" font-size="22" font-weight="700" fill="#46413b">保层级表格结构</text>
+              <text x="427" y="286" text-anchor="middle" font-size="22" font-weight="700" fill="#46413b">语义切片向量化</text>
+
+              <path d="M552 205 L590 205" stroke="#b07219" stroke-width="4.5"/>
+              <polygon points="586,195 604,205 586,215" fill="#b07219"/>
+
+              <!-- Node 3 -->
+              <rect x="606" y="76" width="224" height="258" rx="18" fill="#1b1815" stroke="#1b5e55" stroke-width="3"/>
+              <text x="718" y="138" text-anchor="middle" font-size="26" font-weight="900" fill="#6ed4c1">② 本地外挂</text>
+              <text x="718" y="192" text-anchor="middle" font-size="22" font-weight="800" fill="#faf6ee">常驻本地电脑</text>
+              <text x="718" y="240" text-anchor="middle" font-size="22" font-weight="700" fill="#d4cbc0">隐私不出本机</text>
+              <text x="718" y="286" text-anchor="middle" font-size="22" font-weight="800" fill="#ebc06d">Agent 随时调</text>
+
+              <path d="M836 205 L874 205" stroke="#1b5e55" stroke-width="4.5"/>
+              <polygon points="870,195 888,205 870,215" fill="#1b5e55"/>
+
+              <!-- Node 4 -->
+              <rect x="890" y="42" width="376" height="326" rx="20" fill="#e6f2f0" stroke="#1b5e55" stroke-width="3.5"/>
+              <text x="1078" y="102" text-anchor="middle" font-size="26" font-weight="900" fill="#1b5e55">③ 按需召回注入 x</text>
+              <rect x="916" y="132" width="324" height="66" rx="12" fill="#ffffff" stroke="#8bc4ba" stroke-width="2"/>
+              <text x="1078" y="174" text-anchor="middle" font-size="22" font-weight="800" fill="#1d1b18">仅取最相关 5–8 片段</text>
+              <rect x="916" y="214" width="324" height="66" rx="12" fill="#ffffff" stroke="#8bc4ba" stroke-width="2"/>
+              <text x="1078" y="256" text-anchor="middle" font-size="22" font-weight="800" fill="#1d1b18">自动附文献页码溯源</text>
+              <text x="1078" y="334" text-anchor="middle" font-size="23" font-weight="900" fill="#1b5e55">✓ 省窗口 · 零编造</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P13 · ACT 03 · 现场实机演示：本地肿瘤知识库 RAG（动态翻滚检索 + 零幻觉溯源）
+           =================================================================== -->
+      <section class="slide dark" data-notes="接下来进入第一个现场实机演示环节！我在本机搭建了肿瘤专病 RAG 知识库，覆盖非小细胞肺癌、乳腺癌和肝癌的最新指南与核心临床文献。右侧我专门做了一个本地 RAG 实时检索翻滚演示器：点击左侧任意一个临床病种提问（或直接点红色按钮），就能看到本地向量库高速翻滚检索 428 篇文献切片、重排精筛，最后只花三千多 token 吐出句句标明页码、零幻觉、有理有据的结论——绝不胡编乱造！现场我也可以直接切屏实机演示。">
+        <div class="s-head">
+          <span class="kicker">ACT 03 · 专病外挂落地 · 零幻觉溯源</span>
+          <div class="head-right">
+            <span class="demo-cue ochre">⚡ 点击体验 RAG 翻滚溯源</span>
+            <span class="slide-num">13 / 38</span>
+          </div>
+        </div>
+        <h1 class="title">现场演示：讲者本地肿瘤知识库 <span class="accent-gold">RAG</span></h1>
+        <div class="body grid-2-wide-right">
+          <!-- Left: 3 Clickable Local Oncology RAG Presets + Run Trigger -->
+          <div class="card" style="justify-content:space-between;gap:12px;">
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <span class="tag dark">本机 428 篇指南/RCT · 点击提问演示</span>
+              <div class="rag-query-list">
+                <button class="rag-query-btn active" data-rag-case="nsclc">
+                  🫁 <strong>非小细胞肺癌</strong>：KRAS G12C 脑转移对比
+                </button>
+                <button class="rag-query-btn" data-rag-case="breast">
+                  🎗️ <strong>乳腺癌</strong>：HER2-low T-DXd 生存证据
+                </button>
+                <button class="rag-query-btn" data-rag-case="hcc">
+                  🧬 <strong>肝癌</strong>：IMbrave150 vs HIMALAYA 一线
+                </button>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:12px 10px;border-radius:12px;background:rgba(250,246,238,0.05);border:1px solid rgba(250,246,238,0.14);text-align:center;">
+              <div>
+                <div style="font-family:var(--font-mono);font-size:24px;font-weight:900;color:#ebc06d;">428 篇</div>
+                <div style="font-size:22px;color:#d4cbc0;font-weight:700;">本地指南</div>
+              </div>
+              <div>
+                <div style="font-family:var(--font-mono);font-size:24px;font-weight:900;color:#6ed4c1;">3.8 万</div>
+                <div style="font-size:22px;color:#d4cbc0;font-weight:700;">语义切片</div>
+              </div>
+              <div>
+                <div style="font-family:var(--font-mono);font-size:24px;font-weight:900;color:#f28b78;">0.18s</div>
+                <div style="font-size:22px;color:#d4cbc0;font-weight:700;">溯源召回</div>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <button class="btn btn-demo" id="btn-rag-run" style="width:100%;">⚡ 启动本地 RAG 检索翻滚动画</button>
+              <div style="text-align:center;font-size:22px;font-weight:700;color:#d4cbc0;">
+                隐私不出本机 · 现场亦可切屏实机演示
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Interactive Rolling Retrieval Terminal -> Verified Zero-Hallucination Result -->
+          <div class="terminal">
+            <div class="term-bar" style="justify-content:space-between;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span class="term-dot" style="background:#e06c58;"></span>
+                <span class="term-dot" style="background:#ebc06d;"></span>
+                <span class="term-dot" style="background:#6ed4c1;"></span>
+                <span style="margin-left:6px;">local-oncology-rag · 428 PDFs</span>
+              </div>
+              <span style="color:#6ed4c1;font-size:22px;">● LOCAL ONLY</span>
+            </div>
+
+            <div class="rag-stage-wrap">
+              <!-- Animated Rolling Retrieval Overlay -->
+              <div id="rag-rolling-overlay" class="rag-rolling-overlay">
+                <div id="rag-rolling-stream" class="rag-rolling-stream"></div>
+                <div class="matrix-progress-wrap">
+                  <div id="rag-roll-status" class="matrix-status">⚡ 正在本地向量库高速检索…</div>
+                  <div class="matrix-bar-track"><div id="rag-bar-fill" class="matrix-bar-fill"></div></div>
+                </div>
+              </div>
+
+              <!-- Grounded Verified Answer Panel -->
+              <div id="rag-result-card" class="term-body" style="display:flex;flex-direction:column;justify-content:space-between;gap:12px;">
+                <div style="background:#26221e;padding:10px 14px;border-radius:10px;border-left:5px solid #ebc06d;">
+                  <span class="t-prompt">Query &gt; </span>
+                  <span class="t-cmd" id="rag-query-display">对比 KRAS G12C 脑转移颅内 ORR 与 mPFS，标明原文出处。</span>
+                </div>
+
+                <div style="background:#13110f;border:1px solid #352f29;padding:14px 16px;border-radius:12px;display:flex;flex-direction:column;gap:8px;flex:1;justify-content:center;">
+                  <div id="rag-hits-display" style="color:#6ed4c1;font-weight:800;font-size:22px;">
+                    召回 Top-3：CodeBreaK 200 (0.94) · KRYSTAL-1 (0.92) · NCCN (0.89)
+                  </div>
+                  <div id="rag-answer-list" style="font-family:var(--font-sans);font-size:22px;line-height:1.48;color:#faf6ee;"></div>
+                </div>
+
+                <div class="rag-verified-bar">
+                  <span style="white-space:nowrap;">✓ 有理有据 · 句句溯源 · 零编造</span>
+                  <span id="rag-tokens-badge" style="color:#ebc06d;font-family:var(--font-mono);white-space:nowrap;">3,200 tok (省97%) · 0 幻觉</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P13 · ACT 04 · Agent 的里子与面子 + 协议全景与 MCP
+           =================================================================== -->
+      <section class="slide" data-notes="Agent 到底干了两件事？“里子”是用 Harness 治理上下文，喂给大脑最好的输入 x；“面子”是借 MCP 协议和 CLI 给大模型装上手脚，让纯文本大脑能读写本地文件、跑 R/Python、调专业软件！四层协议图把数据传入传出画得一清二楚。">
+        <div class="s-head">
+          <span class="kicker">ACT 04 · 范式剧变 · 给大模型装上手脚</span>
+          <div class="head-right"><span class="slide-num">14 / 38</span></div>
+        </div>
+        <h1 class="title">Agent 的“里子”与“面子”：协议全景与 <span class="accent-pine">MCP</span></h1>
+        <div class="body">
+          <div class="phrase-strip">
+            <div class="strip-pill"><strong>里子</strong>：Harness 治理上下文</div>
+            <div class="strip-pill ochre"><strong>面子</strong>：借 MCP / CLI 装上手脚</div>
+            <div class="strip-pill red"><strong>MCP</strong> ＝ 连接软件的万能接口</div>
+          </div>
+
+          <div class="fig-frame" style="flex:1;padding:14px;">
+            <svg viewBox="0 0 1280 430" style="width:100%;height:100%;">
+              <!-- Layer 1: Human -->
+              <rect x="14" y="76" width="232" height="278" rx="18" fill="#efeae0" stroke="#46413b" stroke-width="3"/>
+              <text x="130" y="138" text-anchor="middle" font-size="26" font-weight="900" fill="#1d1b18">临床医生</text>
+              <text x="130" y="190" text-anchor="middle" font-size="22" font-weight="700" fill="#46413b">语音 / 自然语言</text>
+              <text x="130" y="232" text-anchor="middle" font-size="22" font-weight="700" fill="#46413b">TUI / 极简界面</text>
+              <rect x="38" y="272" width="184" height="54" rx="12" fill="#1b5e55"/>
+              <text x="130" y="308" text-anchor="middle" font-size="22" font-weight="800" fill="#ffffff">定目标与边界</text>
+
+              <!-- Arrow 1 <-> 2 -->
+              <path d="M254 190 L330 190" stroke="#1b5e55" stroke-width="4.5"/>
+              <polygon points="326,180 344,190 326,200" fill="#1b5e55"/>
+              <path d="M342 246 L266 246" stroke="#6e665d" stroke-width="4.5"/>
+              <polygon points="270,236 252,246 270,256" fill="#6e665d"/>
+              <text x="298" y="172" text-anchor="middle" font-size="21" font-weight="800" fill="#1b5e55">指令</text>
+              <text x="298" y="282" text-anchor="middle" font-size="21" font-weight="800" fill="#6e665d">结果</text>
+
+              <!-- Layer 2: Agent -->
+              <rect x="348" y="34" width="336" height="362" rx="20" fill="#1b1815" stroke="#1b5e55" stroke-width="4"/>
+              <text x="516" y="88" text-anchor="middle" font-size="28" font-weight="900" fill="#ebc06d">智能体 Agent</text>
+              <rect x="374" y="114" width="284" height="114" rx="14" fill="#26221e" stroke="#ebc06d" stroke-width="2"/>
+              <text x="516" y="158" text-anchor="middle" font-size="23" font-weight="900" fill="#ebc06d">里子：Harness 治理</text>
+              <text x="516" y="200" text-anchor="middle" font-size="21" font-weight="700" fill="#faf6ee">拼装 x · 压缩 · RAG</text>
+
+              <rect x="374" y="250" width="284" height="118" rx="14" fill="#26221e" stroke="#6ed4c1" stroke-width="2"/>
+              <text x="516" y="294" text-anchor="middle" font-size="23" font-weight="900" fill="#6ed4c1">面子：手脚调度</text>
+              <text x="516" y="336" text-anchor="middle" font-size="21" font-weight="700" fill="#faf6ee">操控软件与脚本执行</text>
+
+              <!-- Upper Right: LLM -->
+              <path d="M692 142 L808 112" stroke="#b07219" stroke-width="4.5"/>
+              <polygon points="804,104 824,108 810,122" fill="#b07219"/>
+              <path d="M818 152 L702 182" stroke="#c2412d" stroke-width="4.5"/>
+              <polygon points="706,190 686,186 700,172" fill="#c2412d"/>
+              <text x="756" y="96" text-anchor="middle" font-size="21" font-weight="900" fill="#b07219">API / x</text>
+
+              <rect x="828" y="30" width="436" height="164" rx="18" fill="#faf1df" stroke="#b07219" stroke-width="3"/>
+              <text x="1046" y="86" text-anchor="middle" font-size="26" font-weight="900" fill="#b07219">大语言模型 LLM（纯大脑）</text>
+              <text x="1046" y="130" text-anchor="middle" font-size="22" font-weight="800" fill="#1d1b18">唯一接口 = 上下文 (JSON/Text)</text>
+              <text x="1046" y="168" text-anchor="middle" font-size="21" font-weight="700" fill="#6e665d">无手无脚，只推理与发调用</text>
+
+              <!-- Lower Right: MCP & Software -->
+              <path d="M692 292 L808 320" stroke="#1b5e55" stroke-width="4.5"/>
+              <polygon points="808,310 824,324 804,330" fill="#1b5e55"/>
+              <path d="M818 356 L702 328" stroke="#1b5e55" stroke-width="4.5"/>
+              <polygon points="702,338 686,324 706,318" fill="#1b5e55"/>
+              <text x="756" y="280" text-anchor="middle" font-size="22" font-weight="900" fill="#1b5e55">MCP / CLI</text>
+
+              <rect x="828" y="232" width="436" height="166" rx="18" fill="#e6f2f0" stroke="#1b5e55" stroke-width="3"/>
+              <text x="1046" y="286" text-anchor="middle" font-size="26" font-weight="900" fill="#1b5e55">本地软件与引擎（手脚）</text>
+              <text x="1046" y="330" text-anchor="middle" font-size="22" font-weight="800" fill="#1d1b18">R / Python · PlotCase · 顶刊美图社</text>
+              <text x="1046" y="368" text-anchor="middle" font-size="21" font-weight="700" fill="#46413b">本地 RAG · 文件系统 · 终端</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P14 · ACT 04 · 软件的未来：极简 GUI、即用即毁与告别 SPSS
+           =================================================================== -->
+      <section class="slide" data-notes="未来软件形态会发生剧变！像 SPSS 那样堆满上百按钮和层层下拉菜单的软件正在退场——这也是我不建议医生再花大精力死学 SPSS 的原因。未来软件只需暴露干净内核与协议给 Agent 调用；非高频工具按需生成、用完即毁；GUI 最终退化为“弹出成品供人类终审”的极简窗口。">
+        <div class="s-head">
+          <span class="kicker">ACT 04 · 范式剧变 · 软件形态重构</span>
+          <div class="head-right"><span class="slide-num">15 / 38</span></div>
+        </div>
+        <h1 class="title">软件的未来：极简 GUI、“即用即毁”与<span class="accent-red">告别 SPSS</span></h1>
+        <div class="body grid-2">
+          <div class="card border-red" style="gap:14px;">
+            <span class="tag red">传统图形软件（正在退场）</span>
+            <div style="flex:1;background:var(--terracotta-soft);border:2px dashed #e0a399;border-radius:14px;padding:12px;display:flex;align-items:center;justify-content:center;">
+              <svg viewBox="0 0 540 245" style="width:100%;height:100%;">
+                <rect x="16" y="14" width="508" height="218" rx="14" fill="#ffffff" stroke="#d5ccc0" stroke-width="2.5"/>
+                <rect x="16" y="14" width="508" height="44" rx="12" fill="#efeae0"/>
+                <text x="38" y="44" font-size="21" font-weight="800" fill="#6e665d">文件  编辑  数据  转换  分析  图形...</text>
+                <rect x="34" y="76" width="144" height="44" rx="8" fill="#f7f4ee" stroke="#d5ccc0"/><text x="106" y="106" text-anchor="middle" font-size="21" font-weight="700" fill="#6e665d">弹窗菜单</text>
+                <rect x="196" y="76" width="148" height="44" rx="8" fill="#f7f4ee" stroke="#d5ccc0"/><text x="270" y="106" text-anchor="middle" font-size="21" font-weight="700" fill="#6e665d">勾选框 ×40</text>
+                <rect x="362" y="76" width="144" height="44" rx="8" fill="#f7f4ee" stroke="#d5ccc0"/><text x="434" y="106" text-anchor="middle" font-size="21" font-weight="700" fill="#6e665d">手动导出</text>
+                <text x="270" y="186" text-anchor="middle" font-size="44" font-weight="900" fill="#a69c8e">SPSS 点鼠标</text>
+                <line x1="76" y1="210" x2="464" y2="128" stroke="#c2412d" stroke-width="8" stroke-linecap="round"/>
+                <line x1="76" y1="128" x2="464" y2="210" stroke="#c2412d" stroke-width="8" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <ul class="phrase-list red compact">
+              <li>层层菜单，换批数据<strong>全盘重来</strong></li>
+              <li><strong>建议临床同道：告别 SPSS 鼠标流</strong></li>
+            </ul>
+          </div>
+
+          <div class="card border-pine" style="gap:14px;">
+            <span class="tag">Agent 原生软件（正在到来）</span>
+            <div style="flex:1;background:var(--pine-soft);border:2px solid #8bc4ba;border-radius:14px;padding:12px;display:flex;align-items:center;justify-content:center;">
+              <svg viewBox="0 0 540 245" style="width:100%;height:100%;">
+                <rect x="14" y="24" width="224" height="198" rx="16" fill="#1b1815"/>
+                <text x="126" y="76" text-anchor="middle" font-size="25" font-weight="900" fill="#6ed4c1">纯净软件内核</text>
+                <text x="126" y="122" text-anchor="middle" font-size="22" font-weight="700" fill="#faf6ee">API / MCP / CLI</text>
+                <text x="126" y="168" text-anchor="middle" font-size="22" font-weight="800" fill="#ebc06d">Agent 高速直连</text>
+
+                <path d="M244 122 L288 122" stroke="#1b5e55" stroke-width="5"/>
+                <polygon points="284,112 302,122 284,132" fill="#1b5e55"/>
+
+                <rect x="304" y="24" width="222" height="198" rx="16" fill="#ffffff" stroke="#1b5e55" stroke-width="3"/>
+                <text x="415" y="74" text-anchor="middle" font-size="25" font-weight="900" fill="#1b5e55">极简结果窗</text>
+                <rect x="330" y="98" width="170" height="58" rx="10" fill="#e6f2f0" stroke="#1b5e55"/>
+                <text x="415" y="136" text-anchor="middle" font-size="22" font-weight="900" fill="#1d1b18">弹出成品图</text>
+                <text x="415" y="196" text-anchor="middle" font-size="22" font-weight="800" fill="#46413b">人类终审微调</text>
+              </svg>
+            </div>
+            <ul class="phrase-list compact">
+              <li>直连内核 · 非高频工具<strong>即用即毁</strong></li>
+              <li><strong>GUI 退化为人类“终审结果”窗口</strong></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P15 · ACT 04 · 习惯转变 ①：告别网页 Chatbot
+           =================================================================== -->
+      <section class="slide" data-notes="第一个最紧迫的习惯转变：赶紧戒掉在网页 Chatbot 里东聊一句西聊一句、手动复制粘贴报错的低效习惯！把 Agent 当作电脑技术比你还高的“高级用户”。人看图形，机器走格式化文本与协议——转向 TUI/CLI 本地 Agent 工作台，一句话完成全流程！">
+        <div class="s-head">
+          <span class="kicker">ACT 04 · 习惯转变 ① · 重塑人机分工</span>
+          <div class="head-right"><span class="slide-num">16 / 38</span></div>
+        </div>
+        <h1 class="title">习惯转变 ①：告别网页聊天，把 Agent 当<span class="accent-pine">“高级用户”</span></h1>
+        <div class="body grid-2">
+          <div class="card border-red" style="gap:14px;">
+            <span class="tag red">❌ 旧习惯：网页聊天框碎聊（低效循环）</span>
+            <div class="porter-stage">
+              <svg viewBox="0 0 560 320" style="width:100%;height:100%;flex:1;">
+                <!-- Left Computer: Web Chatbot -->
+                <rect x="8" y="34" width="174" height="148" rx="14" fill="#ffffff" stroke="#c2412d" stroke-width="3"/>
+                <rect x="8" y="34" width="174" height="32" rx="12" fill="#c2412d"/>
+                <text x="95" y="57" text-anchor="middle" font-size="21" font-weight="900" fill="#ffffff">网页 Chatbot</text>
+                <rect x="22" y="80" width="122" height="26" rx="8" fill="#fbebe8"/>
+                <text x="83" y="100" text-anchor="middle" font-size="21" font-weight="700" fill="#8f2a1b">代码片段…</text>
+                <rect x="34" y="116" width="134" height="26" rx="8" fill="#efeae0"/>
+                <text x="101" y="136" text-anchor="middle" font-size="21" font-weight="700" fill="#46413b">看不见文件</text>
+                <!-- Monitor stand -->
+                <rect x="74" y="182" width="42" height="12" rx="4" fill="#a69c8e"/>
+                <rect x="52" y="194" width="86" height="8" rx="4" fill="#6e665d"/>
+
+                <!-- Right Computer: Local Software / RStudio -->
+                <rect class="porter-err-flash" x="378" y="34" width="174" height="148" rx="14" fill="#ffffff" stroke="#a69c8e" stroke-width="3"/>
+                <rect x="378" y="34" width="174" height="32" rx="12" fill="#46413b"/>
+                <text x="465" y="57" text-anchor="middle" font-size="21" font-weight="900" fill="#ffffff">本地软件 / R</text>
+                <rect x="392" y="80" width="146" height="36" rx="8" fill="#fbebe8" stroke="#c2412d" stroke-width="1.5"/>
+                <text x="465" y="106" text-anchor="middle" font-size="21" font-weight="900" fill="#c2412d">❌ Error 报错!</text>
+                <text x="465" y="148" text-anchor="middle" font-size="21" font-weight="700" fill="#6e665d">缺包 / 路径错</text>
+                <!-- Monitor stand -->
+                <rect x="444" y="182" width="42" height="12" rx="4" fill="#a69c8e"/>
+                <rect x="422" y="194" width="86" height="8" rx="4" fill="#6e665d"/>
+
+                <!-- Bidirectional shuttle tracks -->
+                <path d="M188 76 L370 76" stroke="#e29b8f" stroke-width="3" stroke-dasharray="7 5"/>
+                <polygon points="366,68 378,76 366,84" fill="#c2412d"/>
+                <path d="M372 174 L190 174" stroke="#8f2a1b" stroke-width="3" stroke-dasharray="7 5"/>
+                <polygon points="194,166 182,174 194,182" fill="#8f2a1b"/>
+
+                <!-- Middle Exhausted Human Figure (animated turning left/right) -->
+                <g class="porter-human-group">
+                  <circle cx="280" cy="112" r="24" fill="#faf1df" stroke="#1d1b18" stroke-width="3"/>
+                  <!-- Eyes & dizzy expression -->
+                  <circle cx="272" cy="109" r="3.2" fill="#1d1b18"/>
+                  <circle cx="288" cy="109" r="3.2" fill="#1d1b18"/>
+                  <path d="M271 122 Q280 117 289 122" fill="none" stroke="#c2412d" stroke-width="2.5" stroke-linecap="round"/>
+                  <!-- Sweat drop -->
+                  <path d="M304 96 Q310 104 304 108 Q298 104 304 96 Z" fill="#c2412d"/>
+                  <!-- Shoulders & busy arms -->
+                  <path d="M244 166 Q248 138 280 138 Q312 138 316 166 Z" fill="#1b5e55"/>
+                  <path d="M248 148 L224 134" stroke="#1d1b18" stroke-width="5" stroke-linecap="round"/>
+                  <path d="M312 148 L336 134" stroke="#1d1b18" stroke-width="5" stroke-linecap="round"/>
+                </g>
+
+                <!-- Animated Flying Packet 1: Left -> Right (Ctrl+C 代码) -->
+                <g class="porter-packet-right">
+                  <rect x="116" y="4" width="154" height="36" rx="18" fill="#c2412d"/>
+                  <text x="193" y="29" text-anchor="middle" font-size="21" font-weight="900" fill="#ffffff">Ctrl+C 代码 ➔</text>
+                </g>
+
+                <!-- Animated Flying Packet 2: Right -> Left (Ctrl+V 报错) -->
+                <g class="porter-packet-left">
+                  <rect x="304" y="182" width="164" height="36" rx="18" fill="#8f2a1b"/>
+                  <text x="386" y="207" text-anchor="middle" font-size="21" font-weight="900" fill="#ffffff">⬅ 贴回报错 Ctrl+V</text>
+                </g>
+
+                <!-- Bottom punchline pill -->
+                <g class="porter-loop-badge" style="transform-origin:280px 268px;">
+                  <rect x="26" y="236" width="508" height="68" rx="14" fill="#ffffff" stroke="#c2412d" stroke-width="2.5"/>
+                  <text x="280" y="279" text-anchor="middle" font-size="24" font-weight="900" fill="#8f2a1b">↻ 人沦为“复制粘贴搬运工” · 折腾 20 轮！</text>
+                </g>
+              </svg>
+            </div>
+            <ul class="phrase-list red compact">
+              <li>脱离本地环境，上下文充满碎聊与报错噪声</li>
+            </ul>
+          </div>
+
+          <div class="card border-pine" style="gap:14px;">
+            <span class="tag">✅ 新范式：TUI / CLI 本地委派</span>
+            <div class="terminal" style="flex:1;">
+              <div class="term-bar">
+                <span class="term-dot" style="background:#e06c58;"></span>
+                <span class="term-dot" style="background:#ebc06d;"></span>
+                <span class="term-dot" style="background:#6ed4c1;"></span>
+                <span style="margin-left:8px;">Claude Code / Codex / Antigravity</span>
+              </div>
+              <div class="term-body" style="line-height:1.58;">
+                <span class="t-prompt">医生 &gt;</span> <span class="t-cmd">读 cohort.csv，绘 KM + 风险表，输出 PDF。</span><br><br>
+                <span class="t-ok">✓ [Read] 自动检查表头与缺失值</span><br>
+                <span class="t-ok">✓ [Write] 生成可复现脚本 km.R</span><br>
+                <span class="t-ok">✓ [Exec] 本地运行 R（缺包自修）</span><br>
+                <span class="t-ok">✓ [Check] 视觉自查后弹出终图</span>
+              </div>
+            </div>
+            <ul class="phrase-list compact">
+              <li>人看图形，Agent 走<strong>格式化协议</strong></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P17 · ACT 04 · 习惯转变 ②：语音优先（Karpathy + Chatterfly）+ 小键盘 + 科研专用服务器
+           =================================================================== -->
+      <section class="slide" data-notes="第二个非常实用的习惯转变：别再死敲键盘了！AI 大神 Andrej Karpathy 极力推广语音输入（Vibe Coding）——开口说话比打字快 3–5 倍。国内用腾讯 Chatterfly（标语“不必想好，开口就好”）或豆包，把你零碎的临床口语瞬间整理成结构化指令！顺着这个趋势，硬件圈冒出只留语音和 Yes/No/Enter 的 Agent 迷你小键盘；更进一步想象未来——你会专门配一台电脑或服务器来做科研！这不是看病的软件，而是一台“写文章的科研机器”：里面常驻 Agent、配齐 R/Python 等全套科研软件、固化标准工作流和 Skill（就像斯坦福 Biomni 等前沿科研智能体项目已经展现的方向），把论文分析与写作变成一台开箱即用的专属科研服务器！">
+        <div class="s-head">
+          <span class="kicker">ACT 04 · 习惯转变 ② · 输入革命与硬件新物种</span>
+          <div class="head-right"><span class="slide-num">17 / 38</span></div>
+        </div>
+        <h1 class="title">习惯转变 ②：<span class="accent-pine">语音优先</span>、迷你小键盘与“科研专机”</h1>
+        <div class="body grid-3">
+          <!-- Col 1: Karpathy + Chatterfly Voice First -->
+          <div class="card border-pine" style="gap:14px;">
+            <span class="tag">① 语音优先 · Karpathy 习惯</span>
+            <div style="display:flex;align-items:center;gap:16px;padding:10px 12px;border-radius:14px;background:var(--bg-soft);">
+              <img class="avatar-circle" src="../assets/media/karpathy_github.jpg" alt="Andrej Karpathy Portrait" />
+              <div style="display:flex;flex-direction:column;gap:4px;">
+                <div style="font-size:24px;font-weight:900;color:var(--ink-1);">Andrej Karpathy</div>
+                <div style="font-size:22px;font-weight:700;color:var(--pine);">“开口说，少敲键”</div>
+              </div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:12px;">
+              <div style="background:var(--pine-soft);border:2px solid #8bc4ba;border-radius:12px;padding:14px 16px;font-size:22px;font-weight:800;color:#10423b;line-height:1.4;">
+                🎙️ 腾讯 <strong>Chatterfly</strong> / 豆包 / Superwhisper<br>
+                “不必想好，开口就好”
+              </div>
+              <ul class="phrase-list compact">
+                <li>碎片口语 → <strong>结构化科研指令</strong></li>
+                <li>比打字快 <strong>3–5 倍</strong>，思维零打断</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Col 2: Agent Mini Keyboard -->
+          <div class="card border-ochre" style="gap:12px;">
+            <span class="tag ochre">② Agent 迷你小键盘</span>
+            <div class="fig-frame" style="flex:1;padding:4px;border:none;box-shadow:none;background:transparent;">
+              <img src="../assets/generated/10_agent_mini_keyboard.png" alt="Agent 迷你小键盘概念图" style="border-radius:12px;" />
+            </div>
+            <ul class="phrase-list ochre compact">
+              <li>告别 104 键死敲代码</li>
+              <li>核心：<strong>语音 + Yes/No/Enter</strong></li>
+            </ul>
+          </div>
+
+          <!-- Col 3: Dedicated Research Computer / Server ("写文章的机器") -->
+          <div class="card border-red" style="gap:12px;">
+            <span class="tag red">③ 未来：科研“写文章专机”</span>
+            <div class="fig-frame" style="flex:1;padding:4px;border:none;box-shadow:none;background:transparent;">
+              <img src="../assets/generated/13_ai_research_server.jpg" alt="未来专属科研 AI 服务器概念图" style="border-radius:12px;" />
+            </div>
+            <ul class="phrase-list red compact">
+              <li>专属电脑/服务器：<strong>Agent+软件+Skill</strong></li>
+              <li>专做科研写文章（如<strong>斯坦福 Biomni</strong>）</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P17 · ACT 05 · 承上启下：数据分析与绘图只是优化 x 的特例
+           =================================================================== -->
+      <section class="slide" data-notes="下半场切入医学数据分析与可视化实战！记住：下半场绝不是另起炉灶，它只是上半场 y = f(x) 的科研特例！只要把整洁数据、项目背景目的与边界、顶刊榜样、美学铁律四大积木装进 x，统计、绘图与论文写作一通百通！">
+        <div class="s-head">
+          <span class="kicker">ACT 05 · 医学科研实战 · 上下半场贯通</span>
+          <div class="head-right"><span class="slide-num">18 / 38</span></div>
+        </div>
+        <h1 class="title">承上启下：数据分析与绘图，只是优化 <span class="accent-red">x</span> 的特例</h1>
+        <div class="body">
+          <div class="phrase-strip">
+            <div class="strip-pill">并非另起炉灶，而是 <strong>y = f(x)</strong> 特例</div>
+            <div class="strip-pill ochre">核心壁垒：<strong>清晰定义背景、目的与边界</strong></div>
+            <div class="strip-pill red">专业越深，给 AI 的<strong>约束越准</strong></div>
+          </div>
+
+          <div class="fig-frame" style="flex:1;padding:14px;">
+            <svg viewBox="0 0 1280 420" style="width:100%;height:100%;">
+              <rect x="18" y="20" width="396" height="84" rx="14" fill="#e6f2f0" stroke="#1b5e55" stroke-width="2.5"/>
+              <text x="44" y="72" font-size="24" font-weight="900" fill="#1b5e55">① 整洁数据 Tidy Data</text>
+
+              <rect x="18" y="118" width="396" height="84" rx="14" fill="#faf1df" stroke="#b07219" stroke-width="2.5"/>
+              <text x="44" y="170" font-size="24" font-weight="900" fill="#b07219">② 项目背景、目的与边界</text>
+
+              <rect x="18" y="216" width="396" height="84" rx="14" fill="#f3edf2" stroke="#6d4c67" stroke-width="2.5"/>
+              <text x="44" y="268" font-size="24" font-weight="900" fill="#6d4c67">③ 优秀顶刊榜样（原图+源码）</text>
+
+              <rect x="18" y="314" width="396" height="84" rx="14" fill="#fbebe8" stroke="#c2412d" stroke-width="2.5"/>
+              <text x="44" y="366" font-size="24" font-weight="900" fill="#c2412d">④ 顶刊美学与出版铁律</text>
+
+              <path d="M422 62 L486 210 M422 160 L486 210 M422 258 L486 210 M422 356 L486 210" stroke="#46413b" stroke-width="4"/>
+
+              <rect x="490" y="102" width="292" height="216" rx="22" fill="#1b1815" stroke="#ebc06d" stroke-width="3.5"/>
+              <text x="636" y="172" text-anchor="middle" font-size="30" font-weight="900" fill="#ebc06d">Agent × f(x)</text>
+              <text x="636" y="222" text-anchor="middle" font-size="23" font-weight="800" fill="#faf6ee">R / Python 本地执行</text>
+              <text x="636" y="268" text-anchor="middle" font-size="22" font-weight="700" fill="#6ed4c1">可验证 · 可复现</text>
+
+              <path d="M790 210 L846 210" stroke="#1b5e55" stroke-width="5"/>
+              <polygon points="842,199 862,210 842,221" fill="#1b5e55"/>
+
+              <rect x="866" y="38" width="396" height="344" rx="20" fill="#ffffff" stroke="#1b5e55" stroke-width="3.5"/>
+              <text x="1064" y="96" text-anchor="middle" font-size="27" font-weight="900" fill="#1b5e55">输出 y · 顶刊科研资产</text>
+              <rect x="894" y="128" width="340" height="64" rx="12" fill="#e6f2f0"/>
+              <text x="1064" y="169" text-anchor="middle" font-size="23" font-weight="900" fill="#1b5e55">✓ 零误差统计（200/200）</text>
+              <rect x="894" y="208" width="340" height="64" rx="12" fill="#faf1df"/>
+              <text x="1064" y="249" text-anchor="middle" font-size="23" font-weight="900" fill="#b07219">✓ 出版级矢量高清组图</text>
+              <rect x="894" y="288" width="340" height="64" rx="12" fill="#fbebe8"/>
+              <text x="1064" y="329" text-anchor="middle" font-size="23" font-weight="900" fill="#c2412d">✓ GitHub 一键复现仓库</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P18 · ACT 05 · 实战准备 ①：引擎 vs IDE、模型 vs Agent + 三梯队
+           =================================================================== -->
+      <section class="slide" data-notes="开工前扫清两个入门概念：第一，R 和 Python 本体是干活的底层发动机，RStudio 和 VS Code 只是看代码的外壳界面；第二，大模型不等于 Agent，可 1:1 也可 1:N 挂载。最后分享我亲测的实战三梯队：首选 Claude + Claude Code，其次 ChatGPT + Codex，第三 Gemini + Antigravity。">
+        <div class="s-head">
+          <span class="kicker">ACT 05 · 实战准备 ① · 扫清概念障碍</span>
+          <div class="head-right"><span class="slide-num">19 / 38</span></div>
+        </div>
+        <h1 class="title">实战准备 ①：分清引擎与 IDE、模型与 Agent</h1>
+        <div class="body grid-2">
+          <div class="card border-pine" style="gap:16px;">
+            <span class="tag">概念 1：底层引擎 ≠ 界面外壳</span>
+            <div style="flex:1;display:flex;align-items:center;">
+              <svg viewBox="0 0 580 280" style="width:100%;height:100%;">
+                <rect x="10" y="20" width="252" height="240" rx="18" fill="#1b1815"/>
+                <text x="136" y="72" text-anchor="middle" font-size="25" font-weight="900" fill="#6ed4c1">底层发动机</text>
+                <rect x="34" y="102" width="204" height="58" rx="12" fill="#2b2622"/>
+                <text x="136" y="140" text-anchor="middle" font-size="23" font-weight="800" fill="#faf6ee">R 本体引擎</text>
+                <rect x="34" y="176" width="204" height="58" rx="12" fill="#2b2622"/>
+                <text x="136" y="214" text-anchor="middle" font-size="23" font-weight="800" fill="#faf6ee">Python 引擎</text>
+
+                <text x="290" y="154" text-anchor="middle" font-size="40" font-weight="900" fill="#c2412d">≠</text>
+
+                <rect x="318" y="20" width="252" height="240" rx="18" fill="#efeae0" stroke="#a69c8e" stroke-width="2.5"/>
+                <text x="444" y="72" text-anchor="middle" font-size="25" font-weight="900" fill="#46413b">IDE 外壳界面</text>
+                <rect x="342" y="102" width="204" height="58" rx="12" fill="#ffffff"/>
+                <text x="444" y="140" text-anchor="middle" font-size="23" font-weight="800" fill="#1d1b18">RStudio</text>
+                <rect x="342" y="176" width="204" height="58" rx="12" fill="#ffffff"/>
+                <text x="444" y="214" text-anchor="middle" font-size="23" font-weight="800" fill="#1d1b18">VS Code</text>
+              </svg>
+            </div>
+            <p style="font-size:23px;font-weight:800;color:var(--pine);">Agent 直接调底层引擎，不靠手点 IDE</p>
+          </div>
+
+          <div class="card border-ochre" style="gap:14px;">
+            <span class="tag ochre">概念 2：模型 ≠ Agent · 亲测三梯队</span>
+            <div style="display:flex;flex-direction:column;gap:14px;flex:1;justify-content:center;">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-radius:14px;background:var(--pine-soft);border:2.5px solid var(--pine);">
+                <div style="font-size:25px;font-weight:900;color:var(--pine);">① Claude + Claude Code</div>
+                <span class="tag">首选</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-radius:14px;background:var(--ochre-soft);border:2.5px solid var(--ochre);">
+                <div style="font-size:25px;font-weight:900;color:var(--ochre);">② ChatGPT + Codex</div>
+                <span class="tag ochre">二梯队</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-radius:14px;background:var(--terracotta-soft);border:2.5px solid var(--terracotta);">
+                <div style="font-size:25px;font-weight:900;color:var(--terracotta);">③ Gemini + Antigravity</div>
+                <span class="tag red">三梯队</span>
+              </div>
+            </div>
+            <p style="font-size:22px;font-weight:700;color:var(--ink-2);">支持 1:1 专配，也支持单 Agent 挂载多模型</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P20 · ACT 05 · 实战准备 ②：R vs Python 双剑合璧（含官方图标 + 庞大现成数据包生态统计）
+           =================================================================== -->
+      <section class="slide" data-notes="总有同道问该学 R 还是 Python？Agent 时代常态是同时并用！R 称霸医学统计、生存分析、单细胞和顶刊绘图；Python 称霸机器学习、文本清洗与自动化。两门语言最大的红利绝不是语法，而是背后极其庞大的现成数据包生态：CRAN 超过 20,000 个统计与可视化包、Bioconductor 2,400+ 个生信组学专包、PyPI 高达 750,000+ 个开源库——从生存曲线 survival、基线表 tableone、顶刊绘图 ggplot2/ComplexHeatmap，到单细胞 Seurat/scanpy、深度学习 PyTorch，全都是全球科学家打磨好的现成工具，拿来就能用，完全无需从零造轮子！">
+        <div class="s-head">
+          <span class="kicker">ACT 05 · 实战准备 ② · 科研语言与庞大生态红利</span>
+          <div class="head-right"><span class="slide-num">20 / 38</span></div>
+        </div>
+        <h1 class="title" style="display:flex;align-items:center;gap:12px;">
+          <span>实战准备 ②：</span>
+          <!-- Official-style R Logo Icon -->
+          <svg viewBox="0 0 64 50" style="width:46px;height:36px;flex-shrink:0;" aria-label="R Logo">
+            <ellipse cx="29" cy="24" rx="25" ry="17" fill="#cbd5e1" stroke="#64748b" stroke-width="1.5"/>
+            <ellipse cx="31" cy="25" rx="15" ry="10" fill="#f7f4ee"/>
+            <text x="27" y="42" font-family="Helvetica,Arial,sans-serif" font-size="38" font-weight="900" fill="#1b5e55">R</text>
+          </svg>
+          <span class="accent-pine">R</span>
+          <span>与</span>
+          <!-- Official-style Python Logo Icon -->
+          <svg viewBox="0 0 64 64" style="width:38px;height:38px;flex-shrink:0;" aria-label="Python Logo">
+            <path d="M31.8 6C19.5 6 20.3 11.3 20.3 11.3l.01 5.5h11.7v1.7H15.6S7.8 17.6 7.8 30.1c0 12.5 6.8 12.1 6.8 12.1h4.1v-5.8s-.2-6.8 6.7-6.8h11.6s6.5.1 6.5-6.3V12.5S44.4 6 31.8 6zm-6.4 3.8a2.1 2.1 0 1 1 0 4.2 2.1 2.1 0 0 1 0-4.2z" fill="#3776ab"/>
+            <path d="M32.2 58c12.3 0 11.5-5.3 11.5-5.3l-.01-5.5H32v-1.7h16.4s7.8.9 7.8-11.6c0-12.5-6.8-12.1-6.8-12.1h-4.1v5.8s.2 6.8-6.7 6.8H27s-6.5-.1-6.5 6.3v10.8S19.6 58 32.2 58zm6.4-3.8a2.1 2.1 0 1 1 0-4.2 2.1 2.1 0 0 1 0 4.2z" fill="#d99b26"/>
+          </svg>
+          <span class="accent-ochre">Python</span>
+          <span>，双剑合璧</span>
+        </h1>
+        <div class="body grid-2">
+          <!-- Left: Capability Comparison (unchanged core metrics + crisp R/Python icons) -->
+          <div class="fig-frame" style="padding:14px 16px;">
+            <svg viewBox="0 0 640 480" style="width:100%;height:100%;">
+              <!-- Legend with mini R & Python marks -->
+              <rect x="330" y="10" width="24" height="24" rx="6" fill="#1b5e55"/>
+              <text x="364" y="30" font-size="23" font-weight="900" fill="#1b5e55">R 语言</text>
+              <rect x="478" y="10" width="24" height="24" rx="6" fill="#b07219"/>
+              <text x="512" y="30" font-size="23" font-weight="900" fill="#b07219">Python</text>
+
+              <text x="8" y="106" font-size="24" font-weight="900" fill="#1d1b18">生物统计 &amp; 生存</text>
+              <rect x="218" y="76" width="356" height="28" rx="7" fill="#1b5e55"/><text x="584" y="98" font-size="22" font-weight="900" fill="#1b5e55">98</text>
+              <rect x="218" y="112" width="260" height="28" rx="7" fill="#b07219"/><text x="488" y="134" font-size="22" font-weight="900" fill="#b07219">75</text>
+
+              <text x="8" y="208" font-size="24" font-weight="900" fill="#1d1b18">CNS 顶刊绘图</text>
+              <rect x="218" y="178" width="364" height="28" rx="7" fill="#1b5e55"/><text x="592" y="200" font-size="22" font-weight="900" fill="#1b5e55">99</text>
+              <rect x="218" y="214" width="286" height="28" rx="7" fill="#b07219"/><text x="514" y="236" font-size="22" font-weight="900" fill="#b07219">82</text>
+
+              <text x="8" y="310" font-size="24" font-weight="900" fill="#1d1b18">AI / 深度学习</text>
+              <rect x="218" y="280" width="182" height="28" rx="7" fill="#1b5e55"/><text x="410" y="302" font-size="22" font-weight="900" fill="#1b5e55">55</text>
+              <rect x="218" y="316" width="364" height="28" rx="7" fill="#b07219"/><text x="592" y="338" font-size="22" font-weight="900" fill="#b07219">99</text>
+
+              <text x="8" y="412" font-size="24" font-weight="900" fill="#1d1b18">文本 &amp; 自动化</text>
+              <rect x="218" y="382" width="236" height="28" rx="7" fill="#1b5e55"/><text x="464" y="404" font-size="22" font-weight="900" fill="#1b5e55">68</text>
+              <rect x="218" y="418" width="358" height="28" rx="7" fill="#b07219"/><text x="586" y="440" font-size="22" font-weight="900" fill="#b07219">98</text>
+            </svg>
+          </div>
+
+          <!-- Right: Massive Ready-to-Use Package Ecosystem Stats & Function Map -->
+          <div class="card border-pine" style="justify-content:space-between;gap:10px;">
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <span class="tag ochre">最大红利：海量现成工具包 · 拿来即用</span>
+              <div style="font-size:22px;font-weight:800;color:var(--ink-1);line-height:1.35;">
+                R 与 Python 双语并用，直调成熟科研包，无需造轮子！
+              </div>
+            </div>
+
+            <!-- Package Scale Statistical Chart -->
+            <div class="pkg-stat-box">
+              <div style="font-size:22px;font-weight:900;color:var(--ink-1);">📊 全球开源生态规模（无需重造轮子）</div>
+              <div class="pkg-stat-row">
+                <span style="font-size:22px;font-weight:800;color:var(--pine);">CRAN (R主库)</span>
+                <div class="pkg-bar-track"><div class="pkg-bar-fill" style="width:62%;background:var(--pine);"></div></div>
+                <span style="font-family:var(--font-mono);font-size:22px;font-weight:900;color:var(--pine);text-align:right;">20,000+</span>
+              </div>
+              <div class="pkg-stat-row">
+                <span style="font-size:22px;font-weight:800;color:var(--plum);">Bioconductor</span>
+                <div class="pkg-bar-track"><div class="pkg-bar-fill" style="width:36%;background:var(--plum);"></div></div>
+                <span style="font-family:var(--font-mono);font-size:22px;font-weight:900;color:var(--plum);text-align:right;">2,400+</span>
+              </div>
+              <div class="pkg-stat-row">
+                <span style="font-size:22px;font-weight:800;color:var(--ochre);">PyPI (Python)</span>
+                <div class="pkg-bar-track"><div class="pkg-bar-fill" style="width:100%;background:var(--ochre);"></div></div>
+                <span style="font-family:var(--font-mono);font-size:22px;font-weight:900;color:var(--ochre);text-align:right;">750,000+</span>
+              </div>
+            </div>
+
+            <!-- 4-Row Ready-to-Use Package Function Map -->
+            <div class="pkg-cat-list">
+              <div class="pkg-cat-item" style="border-left:5px solid var(--pine);">
+                <strong style="color:var(--pine);white-space:nowrap;">统计生存</strong>
+                <span style="color:var(--ink-1);font-weight:700;"><code>survival</code> · <code>rms</code> · <code>tableone</code>（KM/Cox/表1）</span>
+              </div>
+              <div class="pkg-cat-item" style="border-left:5px solid var(--terracotta);">
+                <strong style="color:var(--terracotta);white-space:nowrap;">顶刊绘图</strong>
+                <span style="color:var(--ink-1);font-weight:700;"><code>ggplot2</code> · <code>ComplexHeatmap</code> · <code>ggpubr</code></span>
+              </div>
+              <div class="pkg-cat-item" style="border-left:5px solid var(--plum);">
+                <strong style="color:var(--plum);white-space:nowrap;">生信组学</strong>
+                <span style="color:var(--ink-1);font-weight:700;"><code>Seurat</code> · <code>limma</code> · <code>scanpy</code>（单细胞/转录）</span>
+              </div>
+              <div class="pkg-cat-item" style="border-left:5px solid var(--ochre);">
+                <strong style="color:var(--ochre);white-space:nowrap;">清洗 AI</strong>
+                <span style="color:var(--ink-1);font-weight:700;"><code>tidyverse</code> · <code>pandas</code> · <code>PyTorch</code>（自动化）</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P20 · ACT 05 · 数据分析最大禁忌：绝不让 LLM 直接“算数据”
+           =================================================================== -->
+      <section class="slide" data-notes="医学数据分析最硬的安全红线：绝不把表格丢进对话框让大模型直接读表口算或手改原表！《A Society of AI Scientists》Fig 13c 200 题实证：直接读表错 29 题，其中 25 题自信度高达 90% 以上！改由大模型写脚本执行，200/200 全对！同时牢记隐私底线：含患者姓名住院号的原表绝不裸传公网！">
+        <div class="s-head">
+          <span class="kicker">ACT 05 · 数据分析铁律 · 零幻觉与隐私</span>
+          <div class="head-right"><span class="slide-num">21 / 38</span></div>
+        </div>
+        <h1 class="title">数据分析最大禁忌：绝不让 LLM 直接<span class="accent-red">“算数据”</span>！</h1>
+        <div class="body">
+          <div class="phrase-strip">
+            <div class="strip-pill red"><strong>铁律 1</strong>：严禁大模型直接读表口算</div>
+            <div class="strip-pill"><strong>实证</strong>：读表错 29/200；写代码 <strong>200/200 全对</strong></div>
+            <div class="strip-pill ochre"><strong>铁律 2</strong>：患者隐私原表绝不裸传公网</div>
+          </div>
+
+          <div class="fig-frame" style="flex:1;">
+            <img src="../assets/generated/04_table_reading_vs_code.png" alt="直接读表口算 vs 写代码执行 200题对照实证" />
+          </div>
+
+          <div class="bottom-bar">
+            <span style="font-size:22px;font-weight:800;color:var(--pine);">正确姿势：仅喂脱敏表头 + 5 行模拟数据 → 写 R / Python 脚本本地跑</span>
+            <button class="btn btn-demo" data-run="04_table_vs_code">⚡ 运行 R 统计脚本出图</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P21 · ACT 05 · 分析前提：Tidy Data → 核对 → 搭建分析框架
+           =================================================================== -->
+      <section class="slide" data-notes="临床分析 80% 的卡壳都在杂乱原表：合并单元格、性别写着男/M/1、缺失值混着 0/NA/无。第一步必须用脚本洗成 Tidy Data（一列一变量、一行一观测）。记住两点：数据核对是不可逾越的底线；搭建分析框架 Agent 辅助拓思路，但临床主线必须由医生拍板！">
+        <div class="s-head">
+          <span class="kicker">ACT 05 · 数据分析前提 · 清洗、核对与框架</span>
+          <div class="head-right"><span class="slide-num">22 / 38</span></div>
+        </div>
+        <h1 class="title">分析前提：<span class="accent-pine">Tidy Data</span> 清洗核对 → 搭建框架</h1>
+        <div class="body grid-2-wide-left">
+          <div class="stack-v">
+            <div class="card border-red" style="flex:0.95;gap:10px;">
+              <h3>❌ 原始临床杂表（高危）</h3>
+              <table class="tidy-table bad">
+                <thead><tr><th>患者/号</th><th>性别年龄</th><th>肿瘤(cm)</th><th>结局</th></tr></thead>
+                <tbody>
+                  <tr><td>张* (8821)</td><td>男 / 62岁</td><td>4.2 → 2.1</td><td>活 14m</td></tr>
+                  <tr><td>李* (8829)</td><td>F / 58</td><td>3.8 → 无</td><td>失访</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card border-pine" style="flex:1.05;gap:10px;">
+              <h3>✅ 标准 Tidy Data（1 列 1 变量）</h3>
+              <table class="tidy-table">
+                <thead><tr><th>id</th><th>sex</th><th>age</th><th>time</th><th>size</th><th>os</th></tr></thead>
+                <tbody>
+                  <tr><td>P001</td><td>M</td><td>62</td><td>Pre</td><td>4.2</td><td>14</td></tr>
+                  <tr><td>P001</td><td>M</td><td>62</td><td>Post</td><td>2.1</td><td>14</td></tr>
+                  <tr><td>P002</td><td>F</td><td>58</td><td>Pre</td><td>3.8</td><td>NA</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card border-ochre" style="justify-content:space-between;gap:12px;">
+            <h3 style="margin:0;">分析前不可跳过的三步</h3>
+            <div class="specimen-box" style="padding:10px;">
+              <svg viewBox="0 0 460 330" style="width:100%;height:100%;">
+                <rect x="14" y="10" width="432" height="84" rx="14" fill="#fbebe8" stroke="#c2412d" stroke-width="2.5"/>
+                <text x="38" y="48" font-size="24" font-weight="900" fill="#c2412d">① 脚本清洗</text>
+                <text x="38" y="80" font-size="22" font-weight="700" fill="#46413b">去隐私脱敏 · 拆分为 Tidy 长表</text>
+
+                <path d="M230 98 L230 116" stroke="#b07219" stroke-width="4"/><polygon points="222,112 230,122 238,112" fill="#b07219"/>
+
+                <rect x="14" y="124" width="432" height="84" rx="14" fill="#faf1df" stroke="#b07219" stroke-width="2.5"/>
+                <text x="38" y="162" font-size="24" font-weight="900" fill="#b07219">② 人工核对（底线）</text>
+                <text x="38" y="194" font-size="22" font-weight="700" fill="#46413b">核查样本量 n、缺失值与异常极值</text>
+
+                <path d="M230 212 L230 230" stroke="#1b5e55" stroke-width="4"/><polygon points="222,226 230,236 238,226" fill="#1b5e55"/>
+
+                <rect x="14" y="238" width="432" height="84" rx="14" fill="#e6f2f0" stroke="#1b5e55" stroke-width="2.5"/>
+                <text x="38" y="276" font-size="24" font-weight="900" fill="#1b5e55">③ 搭建分析框架</text>
+                <text x="38" y="308" font-size="22" font-weight="700" fill="#46413b">Agent 辅助拓思路，临床主线人拍板</text>
+              </svg>
+            </div>
+            <div class="quote-box" style="border-left-color:var(--pine);">
+              <div class="q-text">结构让机器读，目的由人定。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P22 · ACT 05 · 可视化三阶跃迁
+           =================================================================== -->
+      <section class="slide" data-notes="进入医学可视化实战！别再对着 AI 空喊“画一张像 Science 一样高大上的图”——空洞形容词只会得到平庸默认图！看同一份数据，随着我们逐级升级输入 x：明确目的与图型（进阶1）→ 喂顶刊榜样 + 原始散点 + 语义配色 + 统计标注（进阶2），质量断崖式跃迁！">
+        <div class="s-head">
+          <span class="kicker">ACT 05 · 顶刊可视化总纲 · 输入 x 决定上限</span>
+          <div class="head-right"><span class="slide-num">23 / 38</span></div>
+        </div>
+        <h1 class="title">可视化三阶跃迁：别只喊<span class="accent-red">“画一张高大上的图”</span></h1>
+        <div class="body">
+          <div class="phrase-strip">
+            <div class="strip-pill red"><strong>0 阶</strong>：空喊“高大上” → 灰底默认图</div>
+            <div class="strip-pill ochre"><strong>进阶 1</strong>：明确目的、数据类型与图型</div>
+            <div class="strip-pill"><strong>进阶 2</strong>：喂<strong>顶刊榜样</strong> + 美学铁律</div>
+          </div>
+
+          <div class="fig-frame" style="flex:1;">
+            <img src="../assets/generated/08_three_tier_viz_evolution.png" alt="同一数据三阶可视化跃迁对比" />
+          </div>
+
+          <div class="bottom-bar">
+            <span style="font-size:22px;font-weight:700;color:var(--ink-2);">同一内置数据（ToothGrowth），三阶输入 x 升级演示</span>
+            <button class="btn btn-demo" data-run="08_three_tier">⚡ 运行三阶 R 代码出图</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P23 · ACT 05 · 进阶 ①：原版英文顶刊多维范例 + 实时跑 R 代码出图
+           =================================================================== -->
+      <section class="slide" data-notes="进阶第一步是选对图——先看数据结构与统计模型！这四张全是从本机顶刊美图社和 PlotCase 提取的原版高清英文范例：Nature Aging 2024 年龄/BMI/胰岛素敏感性多轨道环形图、20 器官极坐标高级火山图、全球高分辨率空间分布地图、以及 Nature 肺腺癌单细胞星云图！点击任意卡片右上角「⚡ 跑代码」，现场演示真实 R 代码滚动运行并瞬间出图！">
+        <div class="s-head">
+          <span class="kicker">ACT 05 · 可视化进阶 ① · 原版顶刊多维图谱</span>
+          <div class="head-right">
+            <span class="demo-cue">▶ 点「⚡ 跑代码」现场出图</span>
+            <span class="slide-num">24 / 38</span>
+          </div>
+        </div>
+        <h1 class="title">进阶 ①（选对图）：<span class="accent-pine">Nature / PlotCase</span> 高阶原版范例</h1>
+        <div class="body">
+          <div class="grid-2x2" style="flex:1;">
+            <div class="fig-frame">
+              <div class="fig-head-row">
+                <span class="fig-badge">Nature Aging · Age / BMI 多轨环形图</span>
+                <button class="btn-run-mini" data-run="tj_094_bmi_ring">⚡ 跑代码</button>
+              </div>
+              <img src="../assets/top_journal_clean/nature_aging_bmi_ring.png" alt="Nature Aging Age BMI Insulin Ring" />
+            </div>
+            <div class="fig-frame">
+              <div class="fig-head-row">
+                <span class="fig-badge">PlotCase · 20 器官极坐标高级火山图</span>
+                <button class="btn-run-mini" data-run="pc_polar_volcano">⚡ 跑代码</button>
+              </div>
+              <img src="../assets/mcp_covers/plotcase_polar_protein_volcano.png" alt="20-Organ Polar Ring Volcano" />
+            </div>
+            <div class="fig-frame">
+              <div class="fig-head-row">
+                <span class="fig-badge">PlotCase · 全球高分辨率空间分布地图</span>
+                <button class="btn-run-mini" data-run="pc_global_map">⚡ 跑代码</button>
+              </div>
+              <img src="../assets/mcp_covers/plotcase_global_map_warm.png" alt="Global Spatial Distribution Map" />
+            </div>
+            <div class="fig-frame" style="background:#0c0a0d;">
+              <div class="fig-head-row">
+                <span class="fig-badge" style="background:#26221e;border:1px solid rgba(250,246,238,0.22);">Nature · 肺腺癌单细胞星云图</span>
+                <button class="btn-run-mini" data-run="tj_051_luad_galaxy">⚡ 跑代码</button>
+              </div>
+              <img src="../assets/top_journal_clean/nature_2024_luad_galaxy.png" alt="Nature 2024 LUAD Single-Cell Galaxy" />
+            </div>
+          </div>
+
+          <div class="bottom-bar">
+            <span style="font-size:22px;font-weight:800;color:var(--ink-1);">点击「⚡ 跑代码」演示真实 R 脚本出图 · 点击图片全屏放大</span>
+            <div style="display:flex;gap:10px;">
+              <a class="btn ochre" href="https://www.data-to-viz.com/" target="_blank" rel="noopener">↗ Data to Viz</a>
+              <a class="btn" href="https://r-graph-gallery.com/" target="_blank" rel="noopener">↗ R Graph Gallery</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P24 · ACT 05 · 进阶 ②：榜样的力量（三大路径 + 原版顶刊高清封面）
+           =================================================================== -->
+      <section class="slide" data-notes="进阶第二步：榜样的力量是无穷的！给 AI 喂一份顶刊原图与成熟 R 源码，胜过五百字形容词。三条路径：一是 GitHub 免费开源库（FigureYa、PlotOnePiece、讲者 ESMO 开源库）；二是结构化 MCP 图库（PlotCase 与顶刊美图社，看中间展示的 Nature Aging 年龄/BMI 多轨环形图与多轨道基因组图，全英文高清原图配完整代码）；三是客观对比解螺旋等在线黑盒平台——上手快但无源码，审稿修图极难微调。">
+        <div class="s-head">
+          <span class="kicker">ACT 05 · 可视化进阶 ② · 榜样的力量</span>
+          <div class="head-right"><span class="slide-num">25 / 38</span></div>
+        </div>
+        <h1 class="title">进阶 ②（树榜样）：开源库 × <span class="accent-pine">MCP 图库</span> × 在线平台</h1>
+        <div class="body grid-3">
+          <!-- Col 1: Open Source -->
+          <div class="card border-pine" style="justify-content:space-between;gap:12px;">
+            <span class="tag">路径 1 · GitHub 免费开源</span>
+            <ul class="phrase-list compact">
+              <li><strong>FigureYa</strong>（CNS 复现宝库）</li>
+              <li><strong>PlotOnePiece</strong> 医学 R 指南</li>
+              <li><strong>讲者 ESMO 开源复现库</strong></li>
+            </ul>
+            <div class="specimen-box" style="padding:12px 14px;background:var(--pine-soft);border-color:#8bc4ba;gap:8px;">
+              <div style="font-size:22px;font-weight:900;color:var(--pine);">✓ 全开放源码优势</div>
+              <div style="font-size:22px;font-weight:700;color:#10423b;line-height:1.35;">100% 透明可改 · 喂给 Agent 秒懂结构</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <a class="btn primary" href="https://ying-ge.github.io/FigureYa/" target="_blank" rel="noopener">↗ FigureYa</a>
+              <a class="btn" href="https://zhengtiger.github.io/PlotOnePiece/sciRplot.html" target="_blank" rel="noopener">↗ PlotOnePiece</a>
+              <a class="btn ochre" href="https://github.com/wangnianfei/RAS-Targeted-Therapy-Reproducibility" target="_blank" rel="noopener">↗ 讲者 ESMO 仓库</a>
+            </div>
+          </div>
+
+          <!-- Col 2: PlotCase + Top Journal High-Res English Covers -->
+          <div class="card border-ochre" style="gap:12px;">
+            <span class="tag ochre">路径 2 · PlotCase / 顶刊美图社</span>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1;min-height:0;">
+              <div class="fig-frame" style="padding:4px;"><img src="../assets/top_journal_clean/nature_aging_bmi_ring.png" alt="Nature Aging Age BMI Ring" /></div>
+              <div class="fig-frame" style="padding:4px;"><img src="../assets/mcp_covers/plotcase_circos_genome.png" alt="PlotCase Genome Circos" /></div>
+            </div>
+            <ul class="phrase-list ochre compact">
+              <li>原版高清图 + <strong>完整 R 源码</strong></li>
+              <li>接入本地 MCP 一键改编 ✅</li>
+            </ul>
+          </div>
+
+          <!-- Col 3: Online Platforms -->
+          <div class="card border-red" style="justify-content:space-between;gap:12px;">
+            <span class="tag red">路径 3 · 在线平台（解螺旋）</span>
+            <ul class="phrase-list red compact">
+              <li><strong>优点</strong>：零代码、入门快</li>
+              <li><strong>天花板</strong>：无源码、黑盒 ⚠️</li>
+              <li><strong>痛点</strong>：审稿修图极难微调</li>
+            </ul>
+            <div class="specimen-box" style="padding:12px 14px;gap:10px;">
+              <div style="font-size:22px;font-weight:900;color:var(--ink-1);">审稿返修自由度对比</div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:22px;font-weight:800;color:var(--terracotta);"><span>在线黑盒</span><span>15%</span></div>
+                <div style="height:14px;border-radius:99px;background:#efeae0;overflow:hidden;margin-top:4px;"><div style="width:15%;height:100%;background:var(--terracotta);"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:22px;font-weight:800;color:var(--pine);"><span>源码 + Agent</span><span>100%</span></div>
+                <div style="height:14px;border-radius:99px;background:#efeae0;overflow:hidden;margin-top:4px;"><div style="width:100%;height:100%;background:var(--pine);"></div></div>
+              </div>
+            </div>
+            <div class="action-bar" style="padding-top:0;">
+              <a class="btn" href="https://www.helixlife.cn/" target="_blank" rel="noopener">↗ 解螺旋（对照）</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P25 · ACT 05 · 现场交互演示：PlotCase & 顶刊美图社 MCP + Matrix 代码实跑出图
+           =================================================================== -->
+      <section class="slide" data-notes="这是今天最过瘾的现场演示！左侧是从我电脑本机 PlotCase 与顶刊美图社双 MCP 实时检索出的高阶顶刊模板——包括 Nature Aging 年龄/BMI 多轨环形图、20 器官极坐标高级火山图、Nat Commun 多分组环状火山图、全球分布地图、以及临床生存与免疫治疗组图！现在只要我点击左侧任意一行（或点击右上角「⚡ 跑代码出图」），右侧立刻模拟真实 R 代码高速翻滚执行，1.5 秒后直接出图！">
+        <div class="s-head">
+          <span class="kicker">ACT 05 · 真实本机 MCP + 代码实跑演播厅</span>
+          <div class="head-right">
+            <span class="demo-cue">▶ 点任意行自动跑代码出图</span>
+            <span class="slide-num">26 / 38</span>
+          </div>
+        </div>
+        <h1 class="title">现场演示：<span class="accent-pine">PlotCase</span> &amp; <span class="accent-ochre">顶刊美图社</span>（代码实跑出图）</h1>
+        <div class="body grid-2-wide-left">
+          <div class="card border-pine" style="gap:12px;">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+              <button class="btn active-pill" data-mcp="omics">🧬 环形 / 火山 / 地图</button>
+              <button class="btn" data-mcp="survival">🩺 临床生存 / 免疫</button>
+              <button class="btn btn-demo" id="btn-mcp-run-now" style="margin-left:auto;">⚡ 重跑代码出图</button>
+            </div>
+            <div id="mcp-top5-list" style="display:flex;flex-direction:column;gap:10px;flex:1;overflow:auto;"></div>
+          </div>
+
+          <div class="fig-frame" style="padding:12px;">
+            <div class="fig-head-row">
+              <span class="fig-badge" style="background:var(--pine);">实时渲染画布</span>
+              <button class="btn-run-mini" id="btn-mcp-theatre">🖥 全屏代码影院</button>
+            </div>
+            <img id="mcp-preview-img" src="../assets/top_journal_clean/nature_aging_bmi_ring.png" alt="MCP 原版高清顶刊预览" />
+            <div id="mcp-preview-cap" class="fig-caption">点击左侧任意推荐行：自动滚动运行真实 R 代码 → 现场出图</div>
+
+            <!-- Inline Matrix Live Code-Runner Overlay -->
+            <div id="mcp-matrix-layer" class="matrix-inline-layer">
+              <div id="mcp-matrix-stream" class="matrix-stream"></div>
+              <div class="matrix-progress-wrap">
+                <div id="mcp-matrix-status" class="matrix-status">$ Rscript 正在执行…</div>
+                <div class="matrix-bar-track"><div id="mcp-matrix-fill" class="matrix-bar-fill"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P26 · ACT 05 · 交互演示：配色铁律与红绿色盲模拟
+           =================================================================== -->
+      <section class="slide" data-notes="进入全场最受欢迎的现场互动环节——配色铁律！三句话：第一，全文提前统一配色；第二，颜色服从语义，低饱和衬背景、高对比留焦点；第三，严禁彩虹色！现在我现场点击切换 Rainbow → Nature / Lancet / NEJM / Viridis，再点一下“模拟红绿色盲”，大家立刻能明白为什么顶刊封杀彩虹色！">
+        <div class="s-head">
+          <span class="kicker">ACT 05 · 顶刊配色铁律</span>
+          <div class="head-right">
+            <span class="demo-cue">▶ 现场点击切换色板 &amp; 色盲</span>
+            <span class="slide-num">27 / 38</span>
+          </div>
+        </div>
+        <h1 class="title">配色铁律：统一、语义、<span class="accent-red">严禁彩虹色</span></h1>
+        <div class="body grid-2-wide-left">
+          <div class="card border-pine" style="gap:10px;">
+            <div class="palette-controls">
+              <button class="btn active-pill" data-pal="rainbow">Rainbow ❌</button>
+              <button class="btn" data-pal="npg">Nature</button>
+              <button class="btn" data-pal="lancet">Lancet</button>
+              <button class="btn" data-pal="nejm">NEJM</button>
+              <button class="btn" data-pal="viridis">Viridis</button>
+              <button class="btn" data-pal="metbrewer">MetBrewer 名画</button>
+              <button class="btn btn-demo" id="btn-cb-toggle" style="margin-left:auto;">👁 模拟色盲</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+              <span id="pal-active-name" class="tag red"></span>
+              <span id="pal-active-desc" style="font-size:22px;color:var(--ink-2);font-weight:700;"></span>
+            </div>
+            <div id="pal-swatches" class="swatch-strip"></div>
+            <div id="pal-visual-box" style="flex:1;background:#ffffff;border:1.5px solid var(--line);border-radius:12px;padding:8px;display:flex;align-items:center;justify-content:center;min-height:0;">
+              <svg id="pal-live-svg" viewBox="0 0 650 245" style="width:100%;height:100%;"></svg>
+            </div>
+          </div>
+
+          <div class="stack-v">
+            <div class="fig-frame" style="flex:1;">
+              <img src="../assets/generated/01_rainbow_vs_scientific_color.png" alt="彩虹色 vs 科学配色对照" />
+            </div>
+            <div class="card" style="padding:12px 16px;gap:10px;flex-shrink:0;">
+              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                <a class="btn primary" href="https://tigerz.shinyapps.io/CNScolor/#cnscolor" target="_blank" rel="noopener">↗ CNScolor</a>
+                <a class="btn" href="https://github.com/BlakeRMills/MetBrewer" target="_blank" rel="noopener">↗ MetBrewer</a>
+                <a class="btn ochre" href="../docs/nature_aging_color_aesthetics.html" target="_blank" rel="noopener">↗ Nature Aging 拆解</a>
+                <button class="btn-run-mini" style="padding:10px 16px;" data-run="01_rainbow">⚡ 跑配色代码</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P27 · ACT 05 · 排版与字体铁律：逻辑第一、整齐为王、禁用新罗马
+           =================================================================== -->
+      <section class="slide" data-notes="再看排版与字体两条立竿见影的铁律！左侧排版：逻辑第一、极度整齐，告别灰底网格与“炸药柱状图”；右侧字体：临床医生最容易踩坑的是用 Times New Roman，但 Nature / Science / Cell / ESMO 一致强制无衬线体 Arial / Helvetica！因为论文单栏缩至 85mm 后，新罗马体细衬线发糊断笔，无衬线体依然锐利清晰！">
+        <div class="s-head">
+          <span class="kicker">ACT 05 · 排版与字体铁律</span>
+          <div class="head-right"><span class="slide-num">28 / 38</span></div>
+        </div>
+        <h1 class="title">排版与字体：整齐为王、<span class="accent-red">禁用 Times New Roman</span></h1>
+        <div class="body">
+          <div class="phrase-strip">
+            <div class="strip-pill">排版：<strong>逻辑第一 · 极度整齐</strong></div>
+            <div class="strip-pill ochre">字体：统一 <strong>Arial / Helvetica</strong></div>
+            <div class="strip-pill red"><strong>禁用新罗马</strong>：85mm 单栏缩印发糊</div>
+          </div>
+
+          <div class="grid-2" style="flex:1;">
+            <div class="fig-frame">
+              <img src="../assets/generated/02_messy_vs_cns_layout.png" alt="杂乱炸药柱状图 vs CNS 排版" />
+              <div class="fig-caption" style="display:flex;align-items:center;gap:12px;">
+                <span>告别灰底“炸药柱状图”</span>
+                <button class="btn-run-mini" data-run="02_layout">⚡ 跑代码</button>
+              </div>
+            </div>
+
+            <div class="fig-frame">
+              <img src="../assets/generated/07_font_arial_vs_times.png" alt="Times New Roman vs Arial/Helvetica 字体对比" />
+              <div class="fig-caption" style="display:flex;align-items:center;gap:12px;">
+                <span>85mm 单栏清晰度实测</span>
+                <button class="btn-run-mini" data-run="07_fonts">⚡ 跑代码</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P28 · ACT 05 · 进阶挑战：多面板组合图的叙事统御（原版顶刊 + 讲者实战）
+           =================================================================== -->
+      <section class="slide" data-notes="单图好看并不难，真正决定论文能不能冲顶刊的是多面板组合图（Multi-panel）的叙事统御力！左图是 2025 年 Nature 肿瘤免疫治疗原版多面板神图（实验流程 + 泳道图 + 三组 KM 曲线 + 影像 CT + 蜘蛛图 + 瀑布图）；右图是讲者本人用同一套 AI 工作流完成的五面板突变谱与分子机制实战组图！点击任意一张全屏看细节！">
+        <div class="s-head">
+          <span class="kicker">ACT 05 · 顶刊实战 · 多面板叙事统御</span>
+          <div class="head-right"><span class="slide-num">29 / 38</span></div>
+        </div>
+        <h1 class="title">进阶挑战：<span class="accent-pine">多面板组合图</span>的叙事统御</h1>
+        <div class="body">
+          <div class="phrase-strip">
+            <div class="strip-pill">单图容易，<strong>组合图</strong>最见科研功力</div>
+            <div class="strip-pill ochre">Panel a → h <strong>层层递进</strong>完整证据链</div>
+            <div class="strip-pill red"><strong>严格对齐 · 统一字号 · 全局色系</strong></div>
+          </div>
+
+          <div class="grid-2" style="flex:1;">
+            <div class="fig-frame">
+              <span class="fig-badge">Nature 2025 · 免疫治疗 8-Panel 原图</span>
+              <img src="../assets/top_journal_clean/nature_2025_immunotherapy_multipanel.png" alt="Nature 2025 Cancer Immunotherapy Multi-Panel" />
+            </div>
+            <div class="fig-frame">
+              <span class="fig-badge">讲者实战 · 5-Panel 突变机制组图</span>
+              <img src="../assets/extracted/hcc827_fig3_mutational_spectrum.png" alt="HCC827 Fig3 Multi-Panel" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P29 · ACT 05 · 后期精修 & 非数据机制图：AI/PS × Nano Banana（双轨流程图）
+           =================================================================== -->
+      <section class="slide" data-notes="双轨出图打法：数据图轨由 R/Python 导出 PDF/SVG 矢量格式，进 AI/PS 精修；机制图轨先理清分子图元关系，用结构化精细 Prompt + Google Nano Banana 生成右侧这种 Nature Reviews 风格 NSCLC 靶向与免疫机制图！推荐收藏 GitHub 上千条精选科研绘图 Prompt 库 awesome-scientific-figure-prompts。严守期刊红线：严禁文生图伪造实验数据，投稿前必核查目标期刊 AI 图像政策！">
+        <div class="s-head">
+          <span class="kicker">ACT 05 · 双轨出图 · 矢量精修 × 机制图</span>
+          <div class="head-right"><span class="slide-num">30 / 38</span></div>
+        </div>
+        <h1 class="title">后期精修 &amp; 机制图：<span class="accent-pine">AI/PS</span> × <span class="accent-ochre">Nano Banana</span></h1>
+        <div class="body grid-2-wide-right">
+          <div class="card border-pine" style="justify-content:space-between;gap:12px;">
+            <span class="tag">科研双轨制图工作流（绝不混用）</span>
+
+            <div class="specimen-box" style="padding:10px 12px;">
+              <svg viewBox="0 0 540 370" style="width:100%;height:100%;">
+                <!-- Track A: Data Figures -->
+                <rect x="6" y="10" width="528" height="162" rx="16" fill="#e6f2f0" stroke="#1b5e55" stroke-width="2.5"/>
+                <text x="26" y="48" font-size="24" font-weight="900" fill="#1b5e55">轨道 A · 数据统计图（必须代码生成）</text>
+                <rect x="24" y="68" width="144" height="84" rx="12" fill="#ffffff" stroke="#8bc4ba" stroke-width="2"/>
+                <text x="96" y="106" text-anchor="middle" font-size="22" font-weight="900" fill="#1d1b18">R / Python</text>
+                <text x="96" y="136" text-anchor="middle" font-size="21" font-weight="700" fill="#46413b">真实数据</text>
+                <path d="M172 110 L196 110" stroke="#1b5e55" stroke-width="4"/><polygon points="192,102 204,110 192,118" fill="#1b5e55"/>
+                <rect x="206" y="68" width="136" height="84" rx="12" fill="#1b5e55"/>
+                <text x="274" y="106" text-anchor="middle" font-size="22" font-weight="900" fill="#ffffff">PDF / SVG</text>
+                <text x="274" y="136" text-anchor="middle" font-size="21" font-weight="700" fill="#d9f2ee">无损矢量</text>
+                <path d="M346 110 L370 110" stroke="#1b5e55" stroke-width="4"/><polygon points="366,102 378,110 366,118" fill="#1b5e55"/>
+                <rect x="380" y="68" width="136" height="84" rx="12" fill="#ffffff" stroke="#1b5e55" stroke-width="2"/>
+                <text x="448" y="106" text-anchor="middle" font-size="22" font-weight="900" fill="#1b5e55">AI / PS</text>
+                <text x="448" y="136" text-anchor="middle" font-size="21" font-weight="700" fill="#46413b">对齐精修</text>
+
+                <!-- Track B: Schematic / Mechanism -->
+                <rect x="6" y="194" width="528" height="164" rx="16" fill="#faf1df" stroke="#b07219" stroke-width="2.5"/>
+                <text x="26" y="232" font-size="24" font-weight="900" fill="#b07219">轨道 B · 机制示意图（AI 辅助绘制）</text>
+                <rect x="24" y="252" width="144" height="84" rx="12" fill="#ffffff" stroke="#e0be83" stroke-width="2"/>
+                <text x="96" y="290" text-anchor="middle" font-size="22" font-weight="900" fill="#1d1b18">理清图元</text>
+                <text x="96" y="320" text-anchor="middle" font-size="21" font-weight="700" fill="#46413b">通路与结构</text>
+                <path d="M172 294 L196 294" stroke="#b07219" stroke-width="4"/><polygon points="192,286 204,294 192,302" fill="#b07219"/>
+                <rect x="206" y="252" width="128" height="84" rx="12" fill="#b07219"/>
+                <text x="270" y="290" text-anchor="middle" font-size="22" font-weight="900" fill="#ffffff">结构化</text>
+                <text x="270" y="320" text-anchor="middle" font-size="21" font-weight="700" fill="#fef3d8">Prompt</text>
+                <path d="M338 294 L360 294" stroke="#b07219" stroke-width="4"/><polygon points="356,286 368,294 356,302" fill="#b07219"/>
+                <rect x="370" y="252" width="152" height="84" rx="12" fill="#1b1815"/>
+                <text x="446" y="290" text-anchor="middle" font-size="22" font-weight="900" fill="#ebc06d">Gemini</text>
+                <text x="446" y="320" text-anchor="middle" font-size="21" font-weight="700" fill="#faf6ee">Nano Banana</text>
+              </svg>
+            </div>
+
+            <div class="action-bar" style="padding-top:0;">
+              <a class="btn btn-demo" href="https://github.com/Yila-AI/awesome-scientific-figure-prompts" target="_blank" rel="noopener">↗ Awesome Figure Prompts 库</a>
+            </div>
+          </div>
+
+          <div class="stack-v">
+            <div class="fig-frame" style="flex:1.3;">
+              <span class="fig-badge">Nano Banana 示范 · NSCLC 靶免机制</span>
+              <img src="../assets/generated/09_nano_banana_nsclc_mechanism.png" alt="Nano Banana NSCLC Mechanism" />
+            </div>
+            <div class="card" style="padding:12px 18px;background:var(--terracotta-soft);border-color:#e7a095;flex-shrink:0;">
+              <div style="font-size:22px;font-weight:900;color:var(--terracotta);">⚠ 红线：严禁文生图伪造实验数据 · 投稿必查目标期刊 AI 政策！</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P30 · ACT 05 · 出版级细节：图、图注、正文绝不重复（具象化示范卡片）
+           =================================================================== -->
+      <section class="slide" data-notes="临床投稿极易扣分的出版细节：Figure（图）、Legend（图注）和 Main Text（正文）各司其职，绝不把同一串数字机械抄三遍！图展示趋势；图注交待样本量 n、统计法和缩写，不看正文也能独立读懂；正文提炼科学结论与临床意义。绝招：投稿前把目标期刊 Author Guidelines 原文直接喂给 Agent 逐条审校！">
+        <div class="s-head">
+          <span class="kicker">ACT 05 · 出版级细节 · 审稿人视角</span>
+          <div class="head-right"><span class="slide-num">31 / 38</span></div>
+        </div>
+        <h1 class="title">出版级细节：<span class="accent-pine">图</span>、<span class="accent-ochre">图注</span>与<span class="accent-red">正文</span>绝不重复</h1>
+        <div class="body">
+          <div class="grid-3" style="flex:1;">
+            <!-- Col 1: Figure + Mini KM Visual Specimen -->
+            <div class="card border-pine" style="gap:10px;">
+              <span class="tag">① Figure 图形 · 视觉第一眼</span>
+              <div class="specimen-box" style="background:#ffffff;padding:8px 10px;">
+                <svg viewBox="0 0 380 230" style="width:100%;height:100%;">
+                  <line x1="48" y1="190" x2="358" y2="190" stroke="#1d1b18" stroke-width="2.5"/>
+                  <line x1="48" y1="190" x2="48" y2="24" stroke="#1d1b18" stroke-width="2.5"/>
+                  <!-- Treatment curve (Pine) -->
+                  <polyline points="48,36 112,36 112,56 184,56 184,78 262,78 262,102 346,102" fill="none" stroke="#1b5e55" stroke-width="4.5"/>
+                  <!-- Control curve (Terracotta) -->
+                  <polyline points="48,36 96,36 96,82 158,82 158,128 232,128 232,162 346,162" fill="none" stroke="#c2412d" stroke-width="4.5"/>
+                  <text x="348" y="66" text-anchor="end" font-size="22" font-weight="900" fill="#1b5e55">靶免联合</text>
+                  <text x="348" y="148" text-anchor="end" font-size="22" font-weight="900" fill="#c2412d">标准对照</text>
+                  <rect x="64" y="122" width="150" height="58" rx="10" fill="#e6f2f0" stroke="#1b5e55" stroke-width="1.8"/>
+                  <text x="139" y="148" text-anchor="middle" font-size="21" font-weight="900" fill="#1b5e55">HR = 0.58</text>
+                  <text x="139" y="172" text-anchor="middle" font-size="21" font-weight="800" fill="#1d1b18">P = 0.004</text>
+                  <text x="205" y="220" text-anchor="middle" font-size="21" font-weight="800" fill="#46413b">随访时间 (月)</text>
+                </svg>
+              </div>
+              <ul class="phrase-list compact">
+                <li>一眼看清<strong>高低与曲线分离</strong></li>
+                <li>仅标核心 <strong>HR / P 值</strong>，绝不堆字</li>
+              </ul>
+            </div>
+
+            <!-- Col 2: Legend + Annotated Anatomy Specimen -->
+            <div class="card border-ochre" style="gap:10px;">
+              <span class="tag ochre">② Legend 图注 · 独立说明书</span>
+              <div class="specimen-box" style="background:#ffffff;gap:10px;padding:12px 14px;justify-content:center;">
+                <div style="font-size:22px;font-weight:900;color:var(--ink-1);border-bottom:2px solid var(--line);padding-bottom:6px;">
+                  Fig. 2a | Kaplan–Meier OS Curve
+                </div>
+                <div style="font-size:22px;line-height:1.52;color:var(--ink-2);font-weight:700;">
+                  Cohort <span style="background:var(--pine-soft);color:var(--pine);padding:1px 7px;border-radius:6px;font-weight:900;white-space:nowrap;">n = 128</span>;
+                  two-sided <span style="background:var(--ochre-soft);color:var(--ochre);padding:1px 7px;border-radius:6px;font-weight:900;white-space:nowrap;">Log-rank</span> test;
+                  bands show <span style="background:var(--terracotta-soft);color:var(--terracotta);padding:1px 7px;border-radius:6px;font-weight:900;white-space:nowrap;">95% CI</span>;
+                  OS, overall survival.
+                </div>
+              </div>
+              <ul class="phrase-list ochre compact">
+                <li>交待样本量 <strong>n</strong>、误差线与统计法</li>
+                <li><strong>不看正文也能独立读懂整张图</strong></li>
+              </ul>
+            </div>
+
+            <!-- Col 3: Main Text + Bad vs Good Specimen -->
+            <div class="card border-red" style="gap:10px;">
+              <span class="tag red">③ Main Text 正文 · 提炼意义</span>
+              <div class="specimen-box" style="background:#ffffff;gap:10px;padding:12px 14px;justify-content:center;">
+                <div style="padding:10px 12px;border-radius:10px;background:var(--terracotta-soft);border-left:5px solid var(--terracotta);font-size:22px;line-height:1.38;color:#8f2a1b;font-weight:700;">
+                  ❌ 机械抄数：12月 82%、24月 65%、对照 51%…
+                </div>
+                <div style="padding:10px 12px;border-radius:10px;background:var(--pine-soft);border-left:5px solid var(--pine);font-size:22px;line-height:1.38;color:#10423b;font-weight:800;">
+                  ✅ 提炼结论：靶免联合将死亡风险降低 42% (Fig. 2a)。
+                </div>
+              </div>
+              <ul class="phrase-list red compact">
+                <li><strong>绝不机械复述</strong>图上每个数字</li>
+                <li>聚焦临床价值并索引 <code>(Fig. 2a)</code></li>
+              </ul>
+            </div>
+          </div>
+
+          <div style="padding:14px 24px;border-radius:14px;background:#1b1815;color:#ebc06d;font-size:23px;font-weight:900;text-align:center;flex-shrink:0;">
+            💡 审校绝招：把目标期刊 Author Guidelines 原文直接喂给 Agent 逐条核查！
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P31 · ACT 06 · 坦诚声明 AI & 戳破“去水印”误区（Gemini 科学插图 + ICMJE 范本）
+           =================================================================== -->
+      <section class="slide" data-notes="进入最后一幕——科研伦理与人的终极价值。用了 AI 写代码、润色语言，要不要瞒着期刊找“去水印神器”？大可不必！看左侧科学原理示意图：Google SynthID 等前沿 AI 水印根本不是角落里一个能裁掉的 Logo，而是编织进整张图傅里叶频域和像素微格的隐形指纹，裁剪、压缩、改写根本洗不掉！唯一体面合规的道路，是按右侧 ICMJE 第五节范本坦诚声明工具、版本与用途，人类作者负全责。">
+        <div class="s-head">
+          <span class="kicker">ACT 06 · 科研伦理与坦诚</span>
+          <div class="head-right"><span class="slide-num">32 / 38</span></div>
+        </div>
+        <h1 class="title">坦诚声明 AI &amp; 戳破<span class="accent-red">“去水印”</span>误区</h1>
+        <div class="body grid-2">
+          <div class="card border-red" style="gap:10px;">
+            <span class="tag red">真相：隐形频域指纹根本洗不掉（SynthID）</span>
+            <div class="fig-frame" style="flex:1;padding:6px;background:#f7f4ee;border-color:var(--line);">
+              <img src="../assets/generated/11_synthid_invisible_watermark.png" alt="Visible Corner Logo vs Invisible Frequency-Domain Watermark" />
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;flex-shrink:0;">
+              <div style="padding:8px 12px;border-radius:10px;background:var(--bg-soft);font-size:22px;font-weight:800;color:var(--ink-2);text-align:center;">
+                ❌ 误解：剪掉角落 Logo
+              </div>
+              <div style="padding:8px 12px;border-radius:10px;background:var(--terracotta-soft);font-size:22px;font-weight:900;color:var(--terracotta);text-align:center;">
+                ✓ 现实：全图频域/词元指纹
+              </div>
+            </div>
+          </div>
+
+          <div class="card border-pine" style="justify-content:space-between;gap:12px;">
+            <span class="tag">阳光正道：ICMJE 第五节声明规范</span>
+            <ul class="phrase-list compact">
+              <li><strong>绝不把 AI 列为作者</strong>，人类负全责</li>
+              <li>坦诚交代：<strong>工具 · 版本 · 具体用途</strong></li>
+            </ul>
+
+            <div class="icmje-box">
+              <div style="font-family:var(--font-mono);font-size:22px;font-weight:900;color:#ebc06d;">
+                📄 可直接套用的投稿声明范本（Methods）
+              </div>
+              <div style="font-family:Georgia,serif;font-size:22px;line-height:1.45;color:#faf6ee;">
+                “During preparation of this work, the authors used
+                <span style="color:#6ed4c1;font-weight:800;">[Claude / Gemini]</span> for
+                <span style="color:#ebc06d;font-weight:800;">[R script drafting &amp; language editing]</span>.
+                All analyses were independently verified by the authors, who take full responsibility.”
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div style="padding:10px 12px;border-radius:10px;background:var(--pine-soft);font-size:22px;font-weight:800;color:var(--pine);text-align:center;">
+                ✓ 写入 Methods / 致谢
+              </div>
+              <div style="padding:10px 12px;border-radius:10px;background:var(--ochre-soft);font-size:22px;font-weight:800;color:var(--ochre);text-align:center;">
+                ✓ 保留代码与审校记录
+              </div>
+            </div>
+
+            <div class="action-bar" style="padding-top:0;">
+              <a class="btn primary" href="https://www.icmje.org/recommendations/" target="_blank" rel="noopener">↗ 查阅 ICMJE 官方指南</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P32 · ACT 06 · 软件工程思维做科研：GitHub 托管三大件（实景树 + Gemini 活指南插图）
+           =================================================================== -->
+      <section class="slide" data-notes="如何把科研沉淀为复利资产、同时显著提升顶刊接收率？用软件工程思维做科研！我自己的论文全都把脱敏原始数据、清洗后中间数据、完整分析与出图脚本托管到 GitHub，从投稿 v1.0、审稿返修 v1.1 到见刊 v2.0 全程版本可控、一键复现。更长远看，看右侧这幅概念图：传统纸质专著出版即过时，未来医学专著与指南必将演变为全球医生协同提交更新的开源“活教材、活指南”！">
+        <div class="s-head">
+          <span class="kicker">ACT 06 · 科研工程化 · 复利与出版未来</span>
+          <div class="head-right"><span class="slide-num">33 / 38</span></div>
+        </div>
+        <h1 class="title">软件工程思维做科研：三大件托管 <span class="accent-pine">GitHub</span></h1>
+        <div class="body grid-2">
+          <div class="card border-pine" style="justify-content:space-between;gap:12px;">
+            <span class="tag">讲者实践：全量版本可控复现仓库</span>
+            <div class="terminal" style="flex:1;">
+              <div class="term-bar">
+                <span class="term-dot" style="background:#e06c58;"></span>
+                <span class="term-dot" style="background:#ebc06d;"></span>
+                <span class="term-dot" style="background:#6ed4c1;"></span>
+                <span style="margin-left:8px;">RAS-Targeted-Therapy-Reproducibility</span>
+              </div>
+              <div class="term-body" style="display:flex;flex-direction:column;justify-content:space-between;gap:10px;line-height:1.52;">
+                <div>
+                  <span class="t-ok">├── 01_raw_data/</span>   <span class="t-dim"># ① 脱敏原数据</span><br>
+                  <span class="t-ok">├── 02_clean_data/</span> <span class="t-dim"># ② Tidy 中间表</span><br>
+                  <span class="t-ok">├── 03_scripts/</span>    <span class="t-dim"># ③ R / Py 全流程源码</span><br>
+                  <span class="t-ok">├── 04_figures/</span>    <span class="t-dim"># ④ 出版级矢量终图</span><br>
+                  <span class="t-prompt">└── renv.lock</span>      <span class="t-dim"># 锁定包版本一键重跑</span>
+                </div>
+                <div class="gh-version-row" style="padding-top:10px;border-top:1px solid #352f29;">
+                  <span class="gh-ver-pill">v1.0 投稿</span>
+                  <span style="color:#ebc06d;font-weight:900;">→</span>
+                  <span class="gh-ver-pill">v1.1 返修</span>
+                  <span style="color:#ebc06d;font-weight:900;">→</span>
+                  <span class="gh-ver-pill" style="background:rgba(235,192,109,0.2);color:#ebc06d;border-color:#ebc06d;">v2.0 见刊</span>
+                </div>
+              </div>
+            </div>
+            <div class="action-bar" style="padding-top:0;">
+              <a class="btn primary" href="https://github.com/wangnianfei/RAS-Targeted-Therapy-Reproducibility" target="_blank" rel="noopener">↗ 访问讲者真实 GitHub 仓库</a>
+            </div>
+          </div>
+
+          <div class="card border-ochre" style="justify-content:space-between;gap:10px;">
+            <span class="tag ochre">出版延展：从“静态纸书”到“开源活指南”</span>
+            <div class="fig-frame" style="flex:1;padding:6px;background:#f7f4ee;border-color:var(--line);">
+              <img src="../assets/generated/12_living_opensource_knowledge.png" alt="Static Medical Books to Living Open-Source Collaborative Tree" />
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;flex-shrink:0;">
+              <div style="padding:10px 12px;border-radius:10px;background:var(--bg-soft);font-size:22px;font-weight:800;color:var(--ink-2);text-align:center;">
+                纸质专著：出版即过时
+              </div>
+              <div style="padding:10px 12px;border-radius:10px;background:var(--pine-soft);border:1.5px solid var(--pine);font-size:22px;font-weight:900;color:var(--pine);text-align:center;">
+                开源活指南：全球实时迭代
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P33 · ACT 06 · 终极叩问（WARM OBSIDIAN CLIMAX）：AI 写、审、读论文
+           =================================================================== -->
+      <section class="slide dark" data-notes="走到最后，把思考拉到最深处！看右图《A Society of AI Scientists》202 对论文全文本盲评森林图：AI 智能体在规范性、严谨度、可复现性上已全面反超人类！现实已形成闭环：AI 写论文、AI 审论文、AI 读论文。但请盯紧橙色两行——人类依然稳稳胜出的，恰恰是 Novelty（原创性）和 Significance（重要性）！当执行被机器碾压，什么样的研究才真正值得写？">
+        <div class="s-head">
+          <span class="kicker">ACT 06 · 终极叩问 · 盲评铁证</span>
+          <div class="head-right"><span class="slide-num">34 / 38</span></div>
+        </div>
+        <h1 class="title">终极叩问：当 AI 写论文、审论文、读论文……</h1>
+        <div class="body grid-visual-right">
+          <div class="card" style="justify-content:space-between;gap:12px;">
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <span class="tag dark">202 对论文盲评 · Fig. 15d</span>
+              <ul class="phrase-list gold compact">
+                <li><strong>AI 反超</strong>：规范 · 严谨 · 可复现</li>
+                <li><strong style="color:#f28b78;">人胜出：Novelty 原创性</strong></li>
+                <li><strong style="color:#f28b78;">人胜出：Significance 重要性</strong></li>
+              </ul>
+            </div>
+
+            <!-- AI Write -> AI Review -> AI Read Closed-Loop Schematic -->
+            <div style="flex:1;min-height:0;background:#141210;border:1.5px solid rgba(235,192,109,0.28);border-radius:14px;padding:8px 10px;display:flex;align-items:center;justify-content:center;">
+              <svg viewBox="0 0 430 248" style="width:100%;height:100%;">
+                <defs>
+                  <marker id="arr-gold" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#ebc06d"/>
+                  </marker>
+                  <marker id="arr-sage" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#6ed4c1"/>
+                  </marker>
+                  <marker id="arr-coral" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#f28b78"/>
+                  </marker>
+                </defs>
+
+                <!-- Curved closed-loop arrows -->
+                <path class="ai-loop-dash" d="M296 44 Q368 80 360 158" fill="none" stroke="#ebc06d" stroke-width="3.5" marker-end="url(#arr-gold)"/>
+                <path class="ai-loop-dash" d="M250 210 Q215 224 180 210" fill="none" stroke="#6ed4c1" stroke-width="3.5" marker-end="url(#arr-sage)"/>
+                <path class="ai-loop-dash" d="M70 158 Q62 80 134 44" fill="none" stroke="#f28b78" stroke-width="3.5" marker-end="url(#arr-coral)"/>
+
+                <!-- Top Node: AI Write -->
+                <rect x="134" y="6" width="162" height="58" rx="14" fill="#29231d" stroke="#ebc06d" stroke-width="2.5"/>
+                <text x="215" y="43" text-anchor="middle" font-size="24" font-weight="900" fill="#ebc06d">✍ AI 写论文</text>
+
+                <!-- Bottom Right Node: AI Review -->
+                <rect x="256" y="172" width="162" height="58" rx="14" fill="#172722" stroke="#6ed4c1" stroke-width="2.5"/>
+                <text x="337" y="209" text-anchor="middle" font-size="24" font-weight="900" fill="#6ed4c1">🔍 AI 审论文</text>
+
+                <!-- Bottom Left Node: AI Read -->
+                <rect x="12" y="172" width="162" height="58" rx="14" fill="#2d1a17" stroke="#f28b78" stroke-width="2.5"/>
+                <text x="93" y="209" text-anchor="middle" font-size="24" font-weight="900" fill="#f28b78">📖 AI 读论文</text>
+
+                <!-- Center Hub: Where is the Human? -->
+                <rect x="148" y="84" width="134" height="68" rx="34" fill="rgba(194,65,45,0.22)" stroke="#f28b78" stroke-width="2" stroke-dasharray="5 4"/>
+                <text x="215" y="113" text-anchor="middle" font-size="21" font-weight="900" fill="#faf6ee">机机闭环</text>
+                <text x="215" y="140" text-anchor="middle" font-size="21" font-weight="900" fill="#f28b78">人在何处?</text>
+              </svg>
+            </div>
+
+            <div style="padding:14px 18px;border-radius:14px;background:rgba(194,65,45,0.22);border:2px solid #f28b78;font-size:24px;font-weight:900;color:#fdece8;line-height:1.36;text-align:center;">
+              什么样的研究，才真正值得写？
+            </div>
+          </div>
+
+          <div class="fig-frame" style="padding:12px;">
+            <img src="../assets/extracted/society_fig15d.png" alt="Society of AI Scientists Fig 15d 盲评森林图" />
+            <div class="fig-caption">Ahmad et al. (Nov 2026) Fig. 15d · 202 对盲评森林图（点击放大）</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P34 · ACT 06 · 人类不可替代的两大核心壁垒（Karpathy 金句 + 世界色彩美学殿堂）
+           =================================================================== -->
+      <section class="slide" data-notes="这恰恰呼应开篇“差距被放大”的底层逻辑！当执行与下限被 AI 彻底拉齐后，人类真正不可替代的核心壁垒归根结底只剩两根支柱：第一是价值取向与价值判断力——就像卡帕西（Andrej Karpathy）说的那句名言：“你可以外包你的思考，但不能外包你的理解”；AI 管怎么做，人定做什么、值不值得做！第二是审美与品味——很多人觉得美太虚幻，其实美是真实存在的！看右侧整整四座世界级色彩殿堂：GitHub 上取色自大都会名画的 MetBrewer、日本和田三造《配色总鉴》与小林重顺的传世色典、商业色彩巨头 Pantone（彩通）与 DIC、以及 CIE 国际照明委员会与 NCS 色彩科学组织——美跨越艺术、出版、产业与科学，真实可辨、值得修炼！而一切科学审美的底线只有五个字：美的前提是真！">
+        <div class="s-head">
+          <span class="kicker">ACT 06 · 核心壁垒 · 呼应开篇</span>
+          <div class="head-right"><span class="slide-num">35 / 38</span></div>
+        </div>
+        <h1 class="title">AI 时代，人类不可替代的两大核心壁垒</h1>
+        <div class="body">
+          <div class="grid-2" style="flex:1;">
+            <!-- Left: Value Judgment + Karpathy Quote -->
+            <div class="card border-pine" style="justify-content:space-between;gap:14px;">
+              <div style="display:flex;align-items:center;gap:14px;">
+                <span style="font-family:var(--font-mono);font-size:44px;font-weight:900;color:var(--pine-soft);-webkit-text-stroke:2px var(--pine);line-height:1;">01</span>
+                <h3 style="font-size:30px;color:var(--pine);margin:0;">价值取向与价值判断</h3>
+              </div>
+
+              <ul class="phrase-list compact">
+                <li><strong>为什么做？</strong>临床真痛点 vs 凑数灌水</li>
+                <li><strong>值不值得？</strong>决定一项研究的长期生命力</li>
+              </ul>
+
+              <div class="karpathy-callout">
+                <img src="../assets/media/karpathy_github.jpg" alt="Andrej Karpathy" />
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                  <div style="font-family:var(--font-serif);font-size:25px;font-weight:900;color:#ebc06d;line-height:1.34;">
+                    “你可以外包你的思考，<br>但不能外包你的理解。”
+                  </div>
+                  <div style="font-size:22px;font-weight:700;color:#d4cbc0;">— Andrej Karpathy</div>
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div style="padding:12px 14px;border-radius:12px;background:var(--bg-soft);border:1.5px solid var(--line);">
+                  <div style="font-size:22px;font-weight:900;color:var(--ink-2);">🤖 AI 接管“怎么做”</div>
+                  <div style="font-size:22px;color:var(--ink-3);margin-top:4px;">检索 · 编码 · 绘图执行</div>
+                </div>
+                <div style="padding:12px 14px;border-radius:12px;background:var(--pine-soft);border:2px solid var(--pine);">
+                  <div style="font-size:22px;font-weight:900;color:var(--pine);">🩺 人定“做什么”</div>
+                  <div style="font-size:22px;color:#10423b;font-weight:700;margin-top:4px;">真痛点 · 值不值得做</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Aesthetics & Taste — Beauty Is Real (MetBrewer + Wada + Pantone + CIE/NCS) -->
+            <div class="card border-red" style="justify-content:space-between;gap:12px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                <div style="display:flex;align-items:center;gap:14px;">
+                  <span style="font-family:var(--font-mono);font-size:44px;font-weight:900;color:var(--terracotta-soft);-webkit-text-stroke:2px var(--terracotta);line-height:1;">02</span>
+                  <h3 style="font-size:30px;color:var(--terracotta);margin:0;">审美与品味 · 美真实存在</h3>
+                </div>
+              </div>
+
+              <div class="aesthetics-grid">
+                <!-- 1. World Masterpiece GitHub -->
+                <div class="aes-tile">
+                  <div style="font-size:22px;font-weight:900;color:var(--ink-1);">🎨 名画配色 GitHub</div>
+                  <div style="font-size:22px;font-weight:700;color:var(--ink-2);">MetBrewer · 大都会名画</div>
+                  <div class="aes-bar" title="MetBrewer Hokusai1">
+                    <span style="background:#6d2f20;"></span><span style="background:#b75347;"></span><span style="background:#df7e66;"></span><span style="background:#edc775;"></span><span style="background:#94b594;"></span><span style="background:#224b5e;"></span>
+                  </div>
+                </div>
+
+                <!-- 2. Classic Color Books (Japan & West) -->
+                <div class="aes-tile">
+                  <div style="font-size:22px;font-weight:900;color:var(--ink-1);">📚 传世配色经典</div>
+                  <div style="font-size:22px;font-weight:700;color:var(--ink-2);">和田三造《配色总鉴》· Albers</div>
+                  <div class="aes-bar" title="Sanzo Wada Japanese Color Harmony">
+                    <span style="background:#26453d;"></span><span style="background:#c53d43;"></span><span style="background:#e6b422;"></span><span style="background:#dcd3b2;"></span>
+                  </div>
+                </div>
+
+                <!-- 3. Industrial Color Powerhouse: Pantone & DIC -->
+                <div class="aes-tile">
+                  <div style="font-size:22px;font-weight:900;color:var(--ink-1);">🏭 产业色彩巨头</div>
+                  <div style="font-size:22px;font-weight:700;color:var(--ink-2);">Pantone 彩通 · DIC</div>
+                  <div class="pantone-row">
+                    <div class="pantone-chip"><div class="p-swatch" style="background:#1b5e55;"></div><div class="p-meta">PANTONE</div></div>
+                    <div class="pantone-chip"><div class="p-swatch" style="background:#c2412d;"></div><div class="p-meta">DIC</div></div>
+                  </div>
+                </div>
+
+                <!-- 4. International Scientific Color Orgs -->
+                <div class="aes-tile">
+                  <div style="font-size:22px;font-weight:900;color:var(--ink-1);">🌐 国际色彩组织</div>
+                  <div style="font-size:22px;font-weight:700;color:var(--ink-2);">CIE (LAB) · NCS · RAL</div>
+                  <div class="aes-bar" title="CIE Perceptually Uniform Viridis">
+                    <span style="background:#440154;"></span><span style="background:#3b528b;"></span><span style="background:#21918c;"></span><span style="background:#5ec962;"></span><span style="background:#fde725;"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#1b1815;border-radius:16px;padding:18px 30px;text-align:center;flex-shrink:0;">
+            <span style="font-family:var(--font-serif);font-size:34px;font-weight:900;color:#ebc06d;letter-spacing:0.06em;">
+              一切科学审美的底线：美的前提是真
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P36 · ACT 06 · 给同道的学习建议（一篇奠基论文 + 动手三层法 + 驱动力金句）
+           =================================================================== -->
+      <section class="slide" data-notes="走到这里，很多同道一定会问：AI 每天冒出几十个新名词，临床医生到底怎么学才不焦虑？分享我最实在的几条经验！第一，别追逐过渡期中间产物——只要底层没换架构，全部大模型都建在 Transformer 之上！你只需要认准谷歌那篇被引用十余万次、短短十几页的奠基论文《Attention Is All You Need》，哪怕作为外行花整整一年把每一层彻底啃懂，以后冒出的所有新词都只是修修剪剪！第二，一定要动手实操！大模型才发展几年，Hugging Face 和 GitHub 上全是 Token 分词、Word2Vec 向量和 GPT-2 开源小模型代码，亲手跑一遍向量化和语义计算，才能真正体会什么叫“涌现”！整个学习分为三层：表层应用 → 代码实现模块 → 懂一点数学原理，这样学才真正扎实！最后，总有人问我：你怎么找到这些工具、怎么搞账号、怎么坚持学的？我只用一句话回答：“瘾君子总能找到大麻，你找不到说明你还没有上瘾。”">
+        <div class="s-head">
+          <span class="kicker">ACT 06 · 讲者学习心法 · 拒绝追逐中间产物</span>
+          <div class="head-right"><span class="slide-num">36 / 38</span></div>
+        </div>
+        <h1 class="title">给同道的学习建议：<span class="accent-pine">啃透一篇论文</span>，三层动手进阶</h1>
+        <div class="body grid-2">
+          <!-- Left: One Anchor Paper + Hands-on Practice -->
+          <div class="card border-pine" style="justify-content:space-between;gap:12px;">
+            <span class="tag">第一法则：不追过客名词，只啃底层基石</span>
+
+            <div class="paper-hero-card">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                <span style="font-family:Georgia,serif;font-size:25px;font-weight:900;color:#ebc06d;">Attention Is All You Need</span>
+                <span style="font-family:var(--font-mono);font-size:22px;color:#6ed4c1;font-weight:800;white-space:nowrap;">15页 · Google</span>
+              </div>
+              <!-- Mini Transformer Pipeline SVG -->
+              <svg viewBox="0 0 620 76" style="width:100%;height:70px;">
+                <rect x="2" y="10" width="96" height="54" rx="10" fill="#26221e" stroke="#6ed4c1" stroke-width="2"/>
+                <text x="50" y="45" text-anchor="middle" font-size="21" font-weight="900" fill="#faf6ee">Token</text>
+                <path d="M102 37 L122 37" stroke="#ebc06d" stroke-width="3.5"/><polygon points="118,30 128,37 118,44" fill="#ebc06d"/>
+
+                <rect x="130" y="10" width="144" height="54" rx="10" fill="#26221e" stroke="#ebc06d" stroke-width="2"/>
+                <text x="202" y="45" text-anchor="middle" font-size="21" font-weight="900" fill="#ebc06d">Embedding</text>
+                <path d="M278 37 L298 37" stroke="#ebc06d" stroke-width="3.5"/><polygon points="294,30 304,37 294,44" fill="#ebc06d"/>
+
+                <rect x="306" y="6" width="194" height="62" rx="10" fill="#1b5e55" stroke="#6ed4c1" stroke-width="2.5"/>
+                <text x="403" y="45" text-anchor="middle" font-size="21" font-weight="900" fill="#ffffff">Self-Attention</text>
+                <path d="M504 37 L524 37" stroke="#ebc06d" stroke-width="3.5"/><polygon points="520,30 530,37 520,44" fill="#ebc06d"/>
+
+                <rect x="532" y="10" width="84" height="54" rx="10" fill="#c2412d"/>
+                <text x="574" y="45" text-anchor="middle" font-size="21" font-weight="900" fill="#ffffff">FFN</text>
+              </svg>
+              <div style="font-size:22px;color:#d4cbc0;font-weight:700;line-height:1.35;">
+                外行花 <strong style="color:#6ed4c1;">1 年</strong>彻底看懂每一层 → 其余热词皆是“修修剪剪”！
+              </div>
+            </div>
+
+            <div class="specimen-box" style="padding:14px 16px;gap:12px;background:var(--pine-soft);border-color:#8bc4ba;">
+              <div style="font-size:23px;font-weight:900;color:var(--pine);">🛠️ 必须亲手跑代码，才能体会“涌现”</div>
+              <div style="font-size:22px;font-weight:700;color:#10423b;line-height:1.38;">
+                在 <strong>Hugging Face / GitHub</strong> 拉取开源小模型，亲手测试：
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;">
+                <div style="padding:8px 6px;border-radius:10px;background:#ffffff;border:1.5px solid #8bc4ba;text-align:center;font-size:22px;font-weight:900;color:var(--pine);">Token 分词</div>
+                <div style="padding:8px 6px;border-radius:10px;background:#ffffff;border:1.5px solid #8bc4ba;text-align:center;font-size:22px;font-weight:900;color:var(--ochre);">Word2Vec 向量</div>
+                <div style="padding:8px 6px;border-radius:10px;background:#ffffff;border:1.5px solid #8bc4ba;text-align:center;font-size:22px;font-weight:900;color:var(--terracotta);">GPT-2 语义计算</div>
+              </div>
+            </div>
+
+            <div class="action-bar" style="padding-top:0;">
+              <a class="btn primary" href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">↗ 论文原文 (arXiv)</a>
+              <a class="btn ochre" href="https://huggingface.co/openai-community/gpt2" target="_blank" rel="noopener">↗ Hugging Face GPT-2</a>
+            </div>
+          </div>
+
+          <!-- Right: 3-Layer Depth Pyramid + Signature Quote -->
+          <div class="card border-ochre" style="justify-content:space-between;gap:12px;">
+            <span class="tag ochre">第二法则：由浅入深 · 扎实进阶三层塔</span>
+
+            <div class="specimen-box" style="padding:10px 12px;background:#ffffff;">
+              <svg viewBox="0 0 580 300" style="width:100%;height:100%;">
+                <!-- Layer 3 (Top - Deepest) -->
+                <rect x="52" y="10" width="476" height="80" rx="14" fill="#fbebe8" stroke="#c2412d" stroke-width="2.8"/>
+                <text x="290" y="45" text-anchor="middle" font-size="25" font-weight="900" fill="#c2412d">③ 数学原理（彻底扎根）</text>
+                <text x="290" y="76" text-anchor="middle" font-size="22" font-weight="700" fill="#46413b">向量空间 · 矩阵变换 · 概率与注意力直觉</text>
+
+                <!-- Up arrow -->
+                <path d="M290 110 L290 94" stroke="#c2412d" stroke-width="4"/><polygon points="282,98 290,88 298,98" fill="#c2412d"/>
+
+                <!-- Layer 2 (Middle) -->
+                <rect x="28" y="112" width="524" height="80" rx="14" fill="#faf1df" stroke="#b07219" stroke-width="2.8"/>
+                <text x="290" y="147" text-anchor="middle" font-size="25" font-weight="900" fill="#b07219">② 代码实现（亲手拆解模块）</text>
+                <text x="290" y="178" text-anchor="middle" font-size="22" font-weight="700" fill="#46413b">实测分词 · 向量化 · 语义相似度 · 小模型前向</text>
+
+                <!-- Up arrow -->
+                <path d="M290 212 L290 196" stroke="#b07219" stroke-width="4"/><polygon points="282,200 290,190 298,200" fill="#b07219"/>
+
+                <!-- Layer 1 (Base) -->
+                <rect x="6" y="214" width="568" height="80" rx="14" fill="#e6f2f0" stroke="#1b5e55" stroke-width="2.8"/>
+                <text x="290" y="249" text-anchor="middle" font-size="25" font-weight="900" fill="#1b5e55">① 表层应用（先用起来解决痛点）</text>
+                <text x="290" y="280" text-anchor="middle" font-size="22" font-weight="700" fill="#46413b">临床数据分析 · 顶刊可视化 · 专病 RAG 落地</text>
+              </svg>
+            </div>
+
+            <div class="addict-quote-box">
+              <div style="font-size:22px;font-weight:800;color:#f28b78;">💬 如何找工具、搞账号、保持持续驱动力？</div>
+              <div style="font-family:var(--font-serif);font-size:26px;font-weight:900;color:#ebc06d;line-height:1.36;">
+                “瘾君子总能找到大麻，<br>你找不到说明你还没有上瘾。”
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P37 · ACT 06 · 致谢与透明声明（工具 · MCP · 文献 · 知识来源全清单）
+           =================================================================== -->
+      <section class="slide" data-notes="最后，身体力行践行我们前面讲的“科研坦诚与透明声明”原则！这一页把制作整套幻灯片和科研工作流中用到的全部 AI 模型与 Agent、本机调用的 MCP 与代码仓库、引用的核心学术文献与规范、以及启发我们的色彩美学与开源教育者，全部堂堂正正地列在致谢页上。所有工作透明可查、全部工具归于致谢，人类讲者对内容负全责！">
+        <div class="s-head">
+          <span class="kicker">ACT 06 · 致谢与透明声明 · 践行 ICMJE 诚实原则</span>
+          <div class="head-right"><span class="slide-num">37 / 38</span></div>
+        </div>
+        <h1 class="title">致谢：本次分享使用的<span class="accent-pine">工具</span>、调用、<span class="accent-ochre">文献</span>与知识来源</h1>
+        <div class="body">
+          <div class="ack-grid">
+            <!-- Box 1: AI Models & Tools -->
+            <div class="card border-pine" style="gap:10px;justify-content:center;">
+              <span class="tag">🤖 AI 模型、Agent 与软件引擎</span>
+              <ul class="phrase-list compact">
+                <li><strong>Claude / Claude Code</strong> · <strong>ChatGPT / Codex</strong></li>
+                <li><strong>Gemini + Antigravity</strong>（本课件多代理协同构建）</li>
+                <li><strong>Gemini Nano Banana</strong>（科学机制与概念插图）</li>
+                <li><strong>腾讯 Chatterfly</strong> · <strong>R / Python / ggplot2</strong></li>
+              </ul>
+            </div>
+
+            <!-- Box 2: Local MCPs & Open-Source Code -->
+            <div class="card border-ochre" style="gap:10px;justify-content:center;">
+              <span class="tag ochre">🔌 本机调用 MCP 与开源代码库</span>
+              <ul class="phrase-list ochre compact">
+                <li><strong>PlotCase MCP</strong> &amp; <strong>顶刊美图社 MCP</strong>（原图+源码）</li>
+                <li><strong>FigureYa</strong> · <strong>PlotOnePiece</strong> · <strong>Data to Viz</strong></li>
+                <li><strong>awesome-scientific-figure-prompts</strong></li>
+                <li><strong>讲者本地肿瘤 RAG</strong> &amp; <strong>ESMO GitHub 复现库</strong></li>
+              </ul>
+            </div>
+
+            <!-- Box 3: Academic Papers & Standards -->
+            <div class="card border-red" style="gap:10px;justify-content:center;">
+              <span class="tag red">📚 核心参考文献与行业规范</span>
+              <ul class="phrase-list red compact">
+                <li>Vaswani et al., <em>Attention Is All You Need</em> (2017)</li>
+                <li><em>A Society of AI Scientists</em> (2026) · <strong>Alpöge / Lean FRO</strong></li>
+                <li>Crameri et al., <em>Nat Commun</em> (2020) · <em>CNS / NEJM</em> 范例</li>
+                <li><strong>ICMJE 第五节 AI 声明规范</strong> · <strong>Google SynthID</strong></li>
+              </ul>
+            </div>
+
+            <!-- Box 4: Aesthetics, Color Science & Educators -->
+            <div class="card border-plum" style="gap:10px;justify-content:center;">
+              <span class="tag" style="background:var(--plum-soft);color:var(--plum);">🎨 色彩美学、开源知识与致敬人物</span>
+              <ul class="phrase-list compact">
+                <li><strong>Prof. Thomas Garrity</strong> · <strong>Andrej Karpathy</strong> · <strong>【闪客】</strong></li>
+                <li><strong>MetBrewer</strong> · <strong>ggsci</strong> · <strong>viridis</strong> · <strong>CNScolor</strong></li>
+                <li><strong>和田三造《配色总鉴》</strong> · <strong>Albers</strong> · <strong>Wilke</strong></li>
+                <li><strong>Pantone 彩通</strong> · <strong>DIC</strong> · <strong>CIE (LAB) / NCS / RAL</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================================
+           P38 · ACT 06 · 首尾闭环封底（WARM OBSIDIAN FINALE + 学术诚信警钟）
+           =================================================================== -->
+      <section class="slide dark" data-notes="最后用一句话完成全场首尾闭环：面对奔腾的 AI 算力野马，我们在外部给它套上 Model Harness（上下文、RAG、MCP、代码闭环），更要在内在给自己装上 Human Harness（专业深度、价值判断、审美品味与学术良知）。请大家看一眼右下角这幅警示图——就在前几天全网震动的医学论文造假丑闻（2026年11月官方通报）：一篇 IF 9.7 期刊的论文里，疑似 AI 生成的小鼠实验图竟画出了“1 厘米 12 个刻度”的荒诞尺子，以及排成一排光滑得像火锅“虾滑”一样的假肿瘤！以此为鉴，送给大家我最想留下的话：美的前提是真，在知识的海洋里，我们至少可以不往里面扔垃圾。谢谢各位同道聆听！">
+        <div class="s-head">
+          <span class="kicker">CLOSING · 首尾闭环</span>
+          <div class="head-right"><span class="slide-num">38 / 38</span></div>
+        </div>
+        <h1 class="title" style="text-align:center;font-size:40px;margin-bottom:14px;">
+          给野马套上 <span class="accent-gold">Harness</span>，更要给大脑装上 <span class="accent-sage">Harness</span>
+        </h1>
+        <div class="body" style="justify-content:space-between;gap:14px;">
+          <div class="grid-2" style="height:auto;flex:0.82;">
+            <div class="card" style="justify-content:center;padding:18px 26px;border-top:5px solid var(--ochre-bright);">
+              <div style="font-size:22px;font-family:var(--font-mono);color:var(--ochre-bright);font-weight:800;">EXTERNAL · 对外驾驭工具</div>
+              <h3 style="font-size:30px;margin:6px 0 10px;">Model Harness</h3>
+              <ul class="phrase-list gold compact">
+                <li>治理 x · 压缩上下文 · 本地 RAG</li>
+                <li>代码执行 + 顶刊榜样 + MCP</li>
+              </ul>
+            </div>
+
+            <div class="card" style="justify-content:center;padding:18px 26px;border-top:5px solid var(--pine-bright);">
+              <div style="font-size:22px;font-family:var(--font-mono);color:var(--pine-bright);font-weight:800;">INTERNAL · 对内守住底线</div>
+              <h3 style="font-size:30px;margin:6px 0 10px;">Human Harness</h3>
+              <ul class="phrase-list sage compact">
+                <li>临床专业深度 · 价值判断 · 品味</li>
+                <li>坦诚声明 · GitHub 开源 · 良知</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="finale-main-row">
+            <div style="display:flex;align-items:center;justify-content:center;text-align:center;padding:22px 30px;border-radius:16px;background:rgba(250,246,238,0.06);border:1.5px solid rgba(235,192,109,0.34);">
+              <div style="font-family:var(--font-serif);font-size:36px;font-weight:900;color:#faf6ee;line-height:1.48;letter-spacing:0.03em;">
+                “美的前提是真，<br>在知识的海洋里，<br>我们至少可以不往里面扔垃圾。”
+              </div>
+            </div>
+
+            <div class="warning-specimen-card">
+              <img src="../assets/generated/14_fake_tumor_12mm_ruler.jpg" alt="警示：AI造假1cm=12格尺子与虾滑状假肿瘤（2026年11月学术不端警示）" />
+              <div style="font-size:22px;font-weight:900;color:#f28b78;text-align:center;line-height:1.25;">
+                ⚠ 警示：1cm=12格尺子 +“虾滑”肿瘤
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid rgba(250,246,238,0.18);flex-shrink:0;">
+            <div style="font-size:24px;color:var(--ink-light);">
+              <strong>谢谢聆听 · 欢迎批评指正</strong> &nbsp;|&nbsp; 王年飞 · 医生
+            </div>
+            <div style="display:flex;gap:12px;">
+              <a class="btn primary" href="https://github.com/wangnianfei/RAS-Targeted-Therapy-Reproducibility" target="_blank" rel="noopener">↗ 开源复现仓库</a>
+              <a class="btn ochre" href="https://github.com/Yila-AI/awesome-scientific-figure-prompts" target="_blank" rel="noopener">↗ 绘图 Prompt 库</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Progress Bar -->
+      <div id="progress-track"><div id="progress-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- Floating Minimal HUD -->
+  <div id="hud">
+    <button id="btn-prev" title="上一页 (←)">◀</button>
+    <span class="hud-counter" id="hud-counter">01 / 38</span>
+    <button id="btn-next" title="下一页 (→)">▶</button>
+    <button id="btn-grid" title="38 页总览 (G)">▦ 总览</button>
+    <button id="btn-notes" title="演讲台词 (N)">📝 讲稿</button>
+    <button id="btn-timer" title="开始/暂停计时">⏱ <span id="timer-display">00:00</span></button>
+    <button id="btn-fs" title="全屏演示 (F)">⛶ 全屏</button>
+  </div>
+
+  <!-- Speaker Notes Drawer -->
+  <div id="notes-drawer">
+    <div class="notes-top">
+      <span>演讲口播提示词（按 N 或 Esc 关闭）</span>
+      <span>完整论述沉淀区</span>
+    </div>
+    <div id="notes-content"></div>
+  </div>
+
+  <!-- 38-Slide Grid Overview Modal -->
+  <div id="overview-modal">
+    <div class="overview-header">
+      <h2 style="font-size:26px;">全 38 页演进总览（点击任意卡片跳转）</h2>
+      <button class="btn" id="btn-close-grid">✕ 关闭 (Esc)</button>
+    </div>
+    <div class="overview-grid" id="overview-grid"></div>
+  </div>
+
+  <!-- Lightbox Modal -->
+  <div id="lightbox">
+    <img id="lightbox-img" src="" alt="高清放大预览" />
+  </div>
+
+  <!-- Matrix Live Code-to-Figure Runner Theatre Modal -->
+  <div id="runner-modal">
+    <div class="runner-dialog">
+      <div class="runner-head">
+        <span class="runner-title" id="runner-title">$ Rscript live_figure.R</span>
+        <div style="display:flex;gap:10px;flex-shrink:0;">
+          <button class="btn-run-mini" id="btn-runner-replay" style="padding:6px 16px;">↺ 重跑代码</button>
+          <button class="btn primary" id="btn-runner-zoom" style="padding:6px 16px;">🔍 全屏看图</button>
+          <button class="btn" id="btn-close-runner" style="padding:6px 16px;">✕ 关闭</button>
+        </div>
+      </div>
+      <div class="runner-body">
+        <div class="runner-code-pane">
+          <div id="runner-code-scroll" class="runner-code-scroll"></div>
+          <div class="matrix-progress-wrap">
+            <div id="runner-status" class="matrix-status">[1/4] 启动本地 R 引擎…</div>
+            <div class="matrix-bar-track"><div id="runner-bar-fill" class="matrix-bar-fill"></div></div>
+          </div>
+        </div>
+        <div class="runner-stage-pane">
+          <div id="runner-curtain" class="runner-curtain">
+            <div style="font-family:var(--font-mono);font-size:26px;font-weight:900;color:#6ee7b7;letter-spacing:0.06em;">⚡ RENDERING VECTOR FIGURE</div>
+            <div id="runner-curtain-pct" style="font-family:var(--font-mono);font-size:56px;font-weight:900;color:#ebc06d;">0%</div>
+            <div style="font-size:22px;font-weight:700;color:#a7f3d0;">真实 R 脚本运行中，即将输出 300 DPI 顶刊成图…</div>
+          </div>
+          <img id="runner-img" src="" alt="代码运行生成的高清顶刊图" />
+          <div id="runner-result-badge" class="runner-result-badge">等待运行…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="deck.js"></script>
+</body>
+</html>

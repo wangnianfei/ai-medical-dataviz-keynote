@@ -1,0 +1,10 @@
+.DS_Store
+**/.DS_Store
+.Rhistory
+**/.Rhistory
+.RData
+.Rproj.user/
+qa_shots/
+scratch/
+*.tmp
+*.log

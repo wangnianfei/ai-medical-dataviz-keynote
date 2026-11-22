@@ -1,0 +1,37 @@
+"patient_id","arm","pfs_months"
+"PT01","Control",6.08
+"PT02","Control",4
+"PT03","Control",5.58
+"PT04","Control",5.29
+"PT05","Control",4.53
+"PT06","Control",2.13
+"PT07","Control",4.44
+"PT08","Control",4.07
+"PT09","Control",5.55
+"PT10","Control",4.78
+"PT11","Control",4.87
+"PT12","Control",4.45
+"PT13","Control",5.11
+"PT14","Control",5.11
+"PT15","Control",2.09
+"PT16","Control",7.15
+"PT17","Control",6.2
+"PT18","Control",5.68
+"PT19","KRASi + PD-1",8.51
+"PT20","KRASi + PD-1",10.9
+"PT21","KRASi + PD-1",9.27
+"PT22","KRASi + PD-1",9.54
+"PT23","KRASi + PD-1",7.57
+"PT24","KRASi + PD-1",12.15
+"PT25","KRASi + PD-1",9.88
+"PT26","KRASi + PD-1",12.85
+"PT27","KRASi + PD-1",12.57
+"PT28","KRASi + PD-1",9.89
+"PT29","KRASi + PD-1",10.83
+"PT30","KRASi + PD-1",12.56
+"PT31","KRASi + PD-1",8.95
+"PT32","KRASi + PD-1",10.07
+"PT33","KRASi + PD-1",9.39
+"PT34","KRASi + PD-1",10.33
+"PT35","KRASi + PD-1",10.09
+"PT36","KRASi + PD-1",11.66
